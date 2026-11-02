@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style>
+<title>NutriAgenda · Asistente</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: barra superior con roles · panel de pantallas a la izquierda · dispositivo centrado (como el modo presentación de Figma) */
+:root{
+  --bg:#EDEFEC; --panel:#FFFFFF; --fg:#1C2B27; --muted:#55625E; --line:#D9DED9; --accent:#1E6B57; --accent-soft:#E3F0EA; --hot:#1877F2;
+  --app:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141917;--panel:#1D2421;--fg:#E8EDEA;--muted:#A3B0AB;--line:#2F3834;--accent:#5FBF9F;--accent-soft:#21352E;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141917;--panel:#1D2421;--fg:#E8EDEA;--muted:#A3B0AB;--line:#2F3834;--accent:#5FBF9F;--accent-soft:#21352E;color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--app);font-size:15px}
+.shell{display:flex;flex-direction:column;min-height:100%;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px;box-sizing:border-box;gap:12px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between}
+.brand{display:flex;flex-direction:column}
+.brand b{font-size:19px}
+.brand span{font-size:13px;color:var(--muted)}
+.roles{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.roles button{border:0;background:transparent;color:var(--fg);font:600 14px var(--app);padding:9px 14px;border-radius:9px;cursor:pointer;min-height:40px}
+.roles button.on{background:var(--accent);color:#fff}
+:root:not([data-theme="light"]) .roles button.on{color:#fff}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.tbtn{border:1px solid var(--line);background:var(--panel);color:var(--fg);font:600 13px var(--app);padding:0 12px;min-height:38px;border-radius:9px;cursor:pointer}
+.tbtn.on{border-color:var(--hot);color:var(--hot)}
+.tbtn:focus-visible,.roles button:focus-visible,.slist button:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+.main{display:flex;gap:16px;flex:1;min-height:0;flex-wrap:wrap;align-items:flex-start}
+.side{flex:0 1 250px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.box h3{margin:0;font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.slist{display:flex;flex-direction:column;gap:2px}
+.slist button{display:flex;gap:8px;align-items:baseline;text-align:left;border:0;background:transparent;color:var(--fg);font:500 14px var(--app);padding:8px 10px;border-radius:8px;cursor:pointer}
+.slist button .c{font-weight:700;color:var(--muted);min-width:24px;font-variant-numeric:tabular-nums}
+.slist button.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.slist button.on .c{color:var(--accent)}
+.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.4}
+.tip{font-size:13px;color:var(--muted);line-height:1.45;margin:0}
+.stage{flex:999 1 420px;min-width:0;display:flex;justify-content:center}
+#scaler{position:relative}
+#bezel{position:absolute;left:0;top:0;transform-origin:top left}
+#bezel.phone{padding:10px;background:#111614;border-radius:54px;box-shadow:0 24px 60px rgba(0,0,0,.28)}
+#bezel.web{background:#DADFDC;border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.22);overflow:hidden}
+#device{position:relative;overflow:hidden;background:#F6F7F4;color:#1C2B27;font-family:var(--app)}
+#bezel.phone #device{width:390px;height:844px;border-radius:44px}
+#bezel.web #device{width:1280px;height:800px}
+.wtop{height:36px;display:flex;align-items:center;gap:8px;padding:0 14px;background:#E4E8E5;border-bottom:1px solid #CFD5D1}
+.wtop i{width:11px;height:11px;border-radius:50%;background:#C5CCC8;display:block}
+.wtop span{margin-left:14px;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;color:#55625E;min-width:280px}
+/* zonas clicables (como Figma) */
+#device.flash [data-act]:not(:disabled),#device.showhot [data-act]:not(:disabled){box-shadow:0 0 0 2px var(--hot),0 0 0 6px rgba(24,119,242,.22)!important}
+@media (prefers-reduced-motion:no-preference){#device [data-act]{transition:box-shadow .15s}}
+/* ===== app (celular) ===== */
+.app{width:390px;height:844px;display:flex;flex-direction:column;background:#F6F7F4;overflow:hidden}
+.ahdr{background:#fff;border-bottom:1px solid #E2E6E1;padding:18px 20px 14px;display:flex;flex-direction:column;gap:8px}
+.ahdr.g{background:#1E6B57;color:#fff;border:0;padding:30px 22px 20px}
+.amain{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+.afoot{background:#fff;border-top:1px solid #E2E6E1;padding:14px 20px 24px;display:flex;flex-direction:column;gap:8px}
+.t{margin:0;font-size:24px;font-weight:700;text-wrap:balance}
+.s{margin:0;font-size:16px;font-weight:600}
+.muted{color:#55625E;font-size:14px;margin:0;line-height:1.45}
+.eyebrow{font-size:12.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.b{min-height:52px;border-radius:14px;border:1px solid #1E6B57;background:#1E6B57;color:#fff;font:600 16px var(--app);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 14px;width:100%;box-sizing:border-box}
+.b.o{background:#fff;color:#1E6B57}
+.b.r{background:#fff;color:#B3261E;border-color:#B3261E}
+.b.sm{min-height:42px;font-size:14px;border-radius:10px;width:auto}
+.b:disabled{background:#DDE2DE;color:#55625E;border-color:#DDE2DE;cursor:not-allowed}
+.back{min-height:44px;background:none;border:0;color:#1E6B57;font:600 15px var(--app);padding:0;cursor:pointer;align-self:flex-start}
+.card{background:#fff;border:1px solid #E2E6E1;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:9px}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:15px;align-items:center}
+.kv>span:first-child{color:#55625E}
+.chip{display:inline-flex;align-items:center;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.ok{background:#E3F0EA;color:#1E6B57}.wa{background:#FCEFD9;color:#8A4B00}.no{background:#FBE4E2;color:#A3221B}.ne{background:#EEF0EC;color:#4A5753}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:#EEF0EC;border-radius:12px;padding:4px;gap:4px}
+.seg button{min-height:40px;border:0;border-radius:9px;background:transparent;font:500 15px var(--app);color:#4A5753;cursor:pointer}
+.seg button.on{background:#fff;color:#1C2B27;font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.opt{min-height:48px;border-radius:12px;border:1px solid #C9D1CC;background:#fff;font:500 16px var(--app);color:#1C2B27;cursor:pointer}
+.opt.on{border:2px solid #1E6B57;background:#E3F0EA;color:#1E6B57;font-weight:700}
+.opt.dk.on{background:#1E6B57;color:#fff}
+.opt:disabled{border-style:dashed;background:#EEF0EC;color:#6B7672;cursor:not-allowed}
+.opt.x:disabled{text-decoration:line-through}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.g6{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.day{min-height:60px;font-size:13px;line-height:1.25}
+.day b{font-size:18px;display:block}
+.fld{display:flex;flex-direction:column;gap:6px;font-size:15px;font-weight:600}
+.fld input,.fld select,.fld textarea{font:400 16px var(--app);min-height:46px;padding:0 12px;border:1px solid #C9D1CC;border-radius:10px;background:#fff;color:#1C2B27;box-sizing:border-box;width:100%}
+.fld textarea{padding:10px 12px;resize:none}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid #C9D1CC;background:#fff;font:500 15px var(--app);color:#1C2B27;cursor:pointer}
+.pill.on{border:2px solid #1E6B57;background:#E3F0EA;color:#1E6B57;font-weight:700}
+.prog{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.prog i{height:6px;border-radius:3px;background:#D5DBD7;display:block}
+.prog i.on{background:#1E6B57}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:15px;line-height:1.4;cursor:pointer;background:none;border:0;padding:4px 0;text-align:left;color:#1C2B27;font-family:var(--app)}
+.box2{width:22px;height:22px;border-radius:6px;border:2px solid #8A968F;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#fff}
+.box2.on{background:#1E6B57;border-color:#1E6B57}
+.big{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+.circle{width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.appt{display:flex;gap:14px;background:#fff;border:1px solid #E2E6E1;border-radius:14px;padding:13px;text-align:left;font-family:var(--app);color:#1C2B27;cursor:pointer;width:100%;box-sizing:border-box}
+.appt .h{display:flex;flex-direction:column;align-items:center;min-width:50px}
+.appt .h b{font-size:18px}
+.appt .h span{font-size:12px;color:#55625E}
+.appt .i{display:flex;flex-direction:column;gap:5px;flex:1}
+.appt .i b{font-size:16.5px}
+.appt.dash{background:#F1F2EF;border-style:dashed}
+.bnav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#fff;border-top:1px solid #E2E6E1;padding:6px 8px 22px}
+.bnav button{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:50px;justify-content:center;font:500 13px var(--app);color:#4A5753;background:none;border:0;cursor:pointer;position:relative}
+.bnav button.on{color:#1E6B57;font-weight:700}
+.badge{position:absolute;top:2px;left:calc(50% + 6px);background:#B3261E;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 6px}
+.qa{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.qa button{display:flex;flex-direction:column;align-items:center;gap:6px;min-height:76px;justify-content:center;border-radius:14px;border:1px solid #E2E6E1;background:#fff;font:600 13px var(--app);color:#1E6B57;cursor:pointer}
+.tabs{display:flex;gap:18px;font-size:15px}
+.tabs button{padding:10px 0;border:0;border-bottom:3px solid transparent;background:none;font:500 15px var(--app);color:#4A5753;cursor:pointer}
+.tabs button.on{border-bottom-color:#1E6B57;color:#1E6B57;font-weight:700}
+.av{display:flex;gap:12px;background:#fff;border:1px solid #E2E6E1;border-radius:14px;padding:13px;text-align:left;font-family:var(--app);color:#1C2B27;cursor:pointer;width:100%;box-sizing:border-box}
+.dot{width:10px;height:10px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.mt{width:100%;border-collapse:collapse;font-size:14px}
+.mt th{text-align:left;color:#55625E;font-weight:600;padding:8px 6px;border-bottom:1px solid #E2E6E1}
+.mt td{padding:9px 6px;border-bottom:1px solid #EEF0EC;font-variant-numeric:tabular-nums}
+/* ===== panel web ===== */
+.wapp{display:flex;height:764px}
+.wside{width:220px;background:#1C2B27;color:#fff;padding:20px 14px;display:flex;flex-direction:column;gap:4px;box-sizing:border-box;flex-shrink:0}
+.wside b{font-size:19px;padding:0 10px 16px}
+.wside button{text-align:left;padding:11px 12px;border-radius:10px;border:0;background:transparent;color:#DCE3DF;font:500 15px var(--app);cursor:pointer}
+.wside button.on{background:#1E6B57;color:#fff;font-weight:700}
+.wside .me{margin-top:auto;padding:10px 12px;font-size:13px;color:#B8C4BE}
+.wmain{flex:1;overflow:auto;padding:24px 28px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.wh{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.wh h1{margin:0;font-size:26px}
+.wrow{display:flex;gap:18px;align-items:flex-start}
+.wcard{background:#fff;border:1px solid #E2E6E1;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.wcard h2{margin:0;font-size:17px}
+.wb{min-height:38px;border-radius:9px;padding:0 14px;font:600 14px var(--app);cursor:pointer;border:1px solid #1E6B57;background:#1E6B57;color:#fff;white-space:nowrap}
+.wb.o{background:#fff;color:#1E6B57}
+.wb.r{background:#fff;color:#B3261E;border-color:#B3261E}
+.wb.k{background:#fff;color:#1C2B27;border-color:#9AA6A0}
+.wb:disabled{background:#E4E8E5;color:#6B7672;border-color:#E4E8E5;cursor:not-allowed}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;color:#55625E;font-weight:600;padding:11px 10px;background:#FAFBF9;border-bottom:1px solid #E2E6E1}
+.tbl td{padding:11px 10px;border-bottom:1px solid #EEF0EC;vertical-align:middle}
+.tbl tr.click{cursor:pointer}
+.tbl tr.click:hover td{background:#F4F8F6}
+.tbl tr.sel td{background:#EAF4EF}
+.wk{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));background:#fff;border:1px solid #E2E6E1;border-radius:14px;overflow:hidden}
+.wk .hd{padding:11px;border-bottom:1px solid #E2E6E1;font-size:14px;font-weight:700}
+.wk .hd.today{background:#E3F0EA;color:#1E6B57}
+.wk .col{padding:8px;display:flex;flex-direction:column;gap:7px;border-right:1px solid #EEF0EC;min-height:430px}
+.wk .col.fer{background:repeating-linear-gradient(135deg,#F1F2EF 0 8px,#FAFBF9 8px 16px)}
+.ev{border-radius:8px;padding:8px;font:400 13px var(--app);text-align:left;border:0;cursor:pointer;color:#1C2B27;line-height:1.35}
+.ev.ok{background:#E3F0EA}.ev.wa{background:#FCEFD9}.ev.no{background:#fff;border:1px dashed #B3261E;color:#A3221B}.ev.ne{background:#EEF0EC;color:#4A5753}
+.ev small{display:block;font-weight:600}
+.fw{display:flex;flex-direction:column;gap:4px;font-size:13.5px;font-weight:600}
+.fw input,.fw select{font:400 14.5px var(--app);min-height:40px;padding:0 10px;border:1px solid #C9D1CC;border-radius:8px;background:#fff;color:#1C2B27;box-sizing:border-box;width:100%}
+.err{color:#A3221B;font-size:13px;font-weight:600;margin:0}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.tile{background:#fff;border:1px solid #E2E6E1;border-radius:14px;padding:14px 16px}
+.tile span{font-size:13.5px;color:#55625E}
+.tile b{display:block;font-size:26px;font-variant-numeric:tabular-nums}
+.wapp.hasdr .wmain{margin-right:360px}
+.wapp.hasdr .rside{display:none!important}
+.drawer{position:absolute;right:0;top:36px;bottom:0;width:360px;background:#fff;border-left:1px solid #D9DED9;box-shadow:-12px 0 30px rgba(0,0,0,.08);padding:22px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box;overflow:auto;z-index:5}
+.fltr{display:flex;background:#EEF0EC;border-radius:10px;padding:4px;gap:2px}
+.fltr button{min-height:34px;padding:0 12px;border:0;border-radius:8px;background:transparent;font:500 14px var(--app);color:#4A5753;cursor:pointer}
+.fltr button.on{background:#fff;color:#1C2B27;font-weight:700}
+.bubble{background:#E7F5EC;border-radius:12px;padding:14px;font-size:14px;line-height:1.5}
+/* modal + toast */
+#modal{position:absolute;inset:0;background:rgba(18,26,23,.45);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px;box-sizing:border-box}
+.mbox{background:#fff;border-radius:18px;padding:22px;width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.mbox h2{margin:0;font-size:20px}
+#toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:#1C2B27;color:#fff;font:500 14.5px var(--app);padding:12px 16px;border-radius:12px;max-width:340px;text-align:center;z-index:30;line-height:1.4;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+#bezel.web #toast{bottom:28px;max-width:520px}
+@media (max-width:860px){.side{flex:1 1 100%}.slist{flex-direction:row;flex-wrap:wrap}.side .box.how{display:none}}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header class="top">
+    <div class="brand"><b>Prototipo NutriAgenda · Asistente</b><span>Navegable · datos ficticios · versión de requerimientos</span></div>
+    <nav class="roles" id="roles" aria-label="Rol del prototipo"><span style="display:flex;align-items:center;border-radius:9px;padding:9px 14px;font:600 14px var(--app);background:var(--accent);color:#fff">Asistente (panel web)</span></nav>
+    <div class="tools">
+      <button class="tbtn" id="hotBtn" aria-pressed="false">Mostrar zonas clicables</button>
+      <button class="tbtn" id="resetBtn">Reiniciar</button>
+    </div>
+  </header>
+  <div class="main">
+    <aside class="side">
+      <div class="box"><h3>Pantallas</h3><div class="slist" id="slist"></div></div>
+      <div class="box"><h3>Recorrido sugerido</h3><ol class="steps" id="steps"></ol></div>
+      <div class="box how"><h3>Cómo usarlo</h3><p class="tip">Toque los botones dentro del dispositivo como en la app real. Si toca una zona sin acción, se marcan en azul las que sí responden, igual que en Figma. La lista de arriba sirve para saltar a cualquier pantalla.</p></div>
+    </aside>
+    <section class="stage" id="stage">
+      <div id="scaler"><div id="bezel" class="phone"><div id="device"></div></div></div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+const ICON={
+ cal:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+ user:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-5.5 8-5.5s6.5 1.5 8 5.5"/></svg>',
+ bell:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0112 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 004 0"/></svg>',
+ chat:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1112 20a8 8 0 01-4.1-1.1z"/></svg>',
+ phone:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"/></svg>',
+ doc:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg>',
+ move:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 10-2.3 5.7M20 5v6h-6"/></svg>',
+ check:'<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1E6B57" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+ tick:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+ clock:'<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#8A4B00" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+ more:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>',
+ x:'<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#A3221B" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg>'
+};
+const V=(id,d)=>S.f[id]!==undefined?S.f[id]:d;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const A=(act,arg)=>`data-act="${act}"${arg!==undefined?` data-arg="${esc(arg)}"`:''}`;
+const chip=(txt)=>{const m={'Confirmada':'ok','Completa':'ok','Al día':'ok','Enviado':'ok','Atendida':'ok','Activa':'ok','Activo':'ok','Por confirmar':'wa','Pendiente':'wa','En progreso':'wa','Por pagar':'wa','Por renovar':'wa','Listo para enviar':'wa','Ofrecido':'wa','Cancelada':'no','No asistió':'no','Falló':'no','Sin acceso':'no'};return `<span class="chip ${m[txt]||'ne'}">${esc(txt)}</span>`;};
+const FULL={Lun:'lunes',Mar:'martes',Mié:'miércoles',Jue:'jueves',Vie:'viernes',Sáb:'sábado'};
+const WEEKS=[
+ {lbl:'9 al 14 nov',days:[['Lun',9],['Mar',10],['Mié',11],['Jue',12],['Vie',13,'fer'],['Sáb',14]]},
+ {lbl:'16 al 21 nov',days:[['Lun',16],['Mar',17],['Mié',18],['Jue',19],['Vie',20],['Sáb',21]]},
+ {lbl:'23 al 28 nov',days:[['Lun',23],['Mar',24],['Mié',25],['Jue',26],['Vie',27],['Sáb',28]]}];
+const slotsFor=d=>d[0]==='Sáb'?['08:00','08:45','09:30','10:15','11:00']:['14:00','14:45','15:30','16:15','17:00','17:45'];
+const taken=(n,s)=>((n*7+s.charCodeAt(1)*3+s.charCodeAt(3)*5)%4)===0;
+const fmt=b=>b?`${FULL[b.d[0]]} ${b.d[1]} de noviembre`:'';
+const fmtS=b=>b?`${b.d[0].toLowerCase()} ${b.d[1]} · ${b.s}`:'';
+
+function init(){return{
+ role:'pac',screen:'P0',hist:[],modal:null,f:{},
+ p:{mode:'nueva',mod:'Presencial',w:0,di:1,slot:null,booked:null,second:null,hstep:1,hst:'Pendiente',conf:false,repro:0,consent:false,cond:['Hipertensión'],file:false,menor:false},
+ d:{logged:false,blocks:[],fsec:0,day:1,
+  form:[{s:'Datos personales y seguro',qs:[['Nombres y apellidos',1],['Cédula',1],['Fecha de nacimiento',1],['¿Tiene seguro médico? ¿Cuál?',0],['Ocupación',0],['Médico que la deriva',0]]},{s:'Antecedentes y hábitos',qs:[['Condiciones de salud',1],['Medicamentos actuales',1],['Alergias o intolerancias',0],['Actividad física semanal',1],['Horas de sueño',0],['Consumo de alcohol o tabaco',0]]},{s:'Alimentación habitual',qs:[['Comidas al día',1],['Vasos de agua al día',1],['Alimentos que no le gustan',0],['Objetivo de la consulta',1]]},{s:'Exámenes y consentimiento',qs:[['Exámenes de laboratorio (archivo)',0],['Consentimiento de datos',1]]}],
+  view:'lista',sel:'a1',tab:'Resumen',q:'',fichaN:'Andrea Salazar',
+  appts:[
+   {id:'a1',t:'14:00',dur:'45 min',n:'Andrea Salazar',mod:'Presencial',tipo:'Derivada',plan:'Plan 1 de 2',est:'Confirmada',hist:'Completa',tel:'099 XXX X142'},
+   {id:'a2',t:'14:45',dur:'45 min',n:'Luis Paredes',mod:'Virtual (Zoom)',tipo:'Propio',plan:'',est:'Confirmada',hist:'Pendiente',tel:'098 XXX X188'},
+   {id:'a3',t:'15:30',dur:'45 min',n:'María Torres',mod:'Presencial',tipo:'Derivada',plan:'Plan 1 de 2',est:'Por confirmar',hist:'Pendiente',tel:'099 XXX X117'},
+   {id:'a4',t:'16:15',dur:'1 h',n:'Jorge Molina',mod:'Presencial',tipo:'Propio · Primera vez',plan:'',est:'Confirmada',hist:'Completa',tel:'097 XXX X105'},
+   {id:'a5',t:'17:15',cancel:true}],
+  notes:{'Andrea Salazar':['27 oct · Reducir azúcares añadidos. Revisar adherencia al plan y nueva medición InBody.','6 oct · Primera consulta. Objetivo: bajar 4 kg en 3 meses.']},
+  avisos:[
+   {t:'Solicitud de excepción',x:'Paula Vera pide recuperar su consulta perdida de octubre (estuvo enferma). Usted decide.',w:'Hace 10 min',c:'#8A4B00',go:'exc',read:false},
+   {t:'Cita cancelada',x:'Carlos Ruiz canceló su cita de hoy a las 17:15. Hay 2 pacientes en lista de espera.',w:'Hace 20 min',c:'#B3261E',go:'D2',read:false},
+   {t:'Nueva reserva',x:'María Torres reservó hoy a las 15:30 (presencial).',w:'Hace 1 h',c:'#1E6B57',go:'a3',read:false},
+   {t:'Historia clínica completa',x:'Jorge Molina terminó su formulario y subió 1 examen.',w:'Hace 3 h',c:'#1E6B57',go:'f:Jorge Molina',read:false},
+   {t:'Plan por renovar',x:'Andrea Salazar usará su última consulta del plan el 24 nov.',w:'Ayer',c:'#8A968F',go:'f:Andrea Salazar',read:true},
+   {t:'Paciente sin confirmar',x:'Luis Paredes no ha confirmado su próxima cita. La asistente fue notificada.',w:'Ayer',c:'#8A968F',go:'a2',read:true}]},
+ a:{logged:false,mtab:'Hoy',tpl:0,ftab:'Datos',ficha:'Andrea Salazar',hedit:false,files:['InBody · 27 oct 2026','InBody · 13 oct 2026','Hemograma · 20 oct 2026'],
+  tpls:[['Bienvenida e historia clínica','Al reservar','Correo','Bienvenida, {nombre}. Su cita quedó reservada para el {fecha} a las {hora}. Por favor, llene su historia clínica antes de la consulta: {enlace}'],['Confirmación de asistencia','3 días antes','WhatsApp','Buenas tardes, {nombre} 🗓️ Su cita de nutrición es el {fecha} a las {hora}. ¿Nos confirma su asistencia? {enlace}'],['Código QR de acceso','1 día antes','WhatsApp','Buenas tardes, {nombre}. Le recordamos su cita de mañana a las {hora}. Adjuntamos su código QR para ingresar al edificio.'],['Recordatorio','24 horas antes','Correo','Hola, {nombre}. Le recordamos su cita de mañana, {fecha}, a las {hora}.'],['Recordatorio','3 horas antes','Correo','Hola, {nombre}. Le esperamos hoy a las {hora}. Hay 15 minutos de tolerancia.'],['Agradecimiento + InBody','Después de la consulta','Correo','Gracias por su visita, {nombre} ✅ Adjuntamos el resultado de su InBody. Su próxima cita es el {proxima}.'],['Recordatorio de historia clínica','1 vez, si no la llenó','WhatsApp','Hola, {nombre}. Aún falta su historia clínica; puede llenarla aquí: {enlace}']],
+  sec:'A1',view:'Semana',drawer:null,filt:'Activos',q:'',msg:0,err:'',perr:'',rep:'Pacientes derivados',med:'Dr. [Derivador A]',offered:null,ingresos:490,
+  week:[
+   [{id:'w1',t:'14:00',n:'Paula Vera',est:'Confirmada',hist:'Completa',mod:'Presencial'},{id:'w2',t:'15:30',n:'Diego Cruz',est:'Confirmada',hist:'Completa',mod:'Presencial'},{id:'w3',t:'17:00',n:'Rosa Mejía',est:'Confirmada',hist:'Pendiente',mod:'Presencial'}],
+   [{id:'w4',t:'14:00',n:'Andrea Salazar',est:'Confirmada',hist:'Completa',mod:'Presencial'},{id:'w5',t:'14:45',n:'Luis Paredes',est:'Confirmada',hist:'Pendiente',mod:'Virtual'},{id:'w6',t:'15:30',n:'María Torres',est:'Por confirmar',hist:'Pendiente',mod:'Presencial'},{id:'w7',t:'16:15',n:'Jorge Molina',est:'Confirmada',hist:'Completa',mod:'Presencial'},{id:'w8',t:'17:15',n:'Carlos Ruiz',est:'Cancelada',hist:'Completa',mod:'Presencial'}],
+   [{id:'w9',t:'14:00',n:'Sofía Lara',est:'Confirmada',hist:'Completa',mod:'Virtual'},{id:'w10',t:'16:15',n:'Pedro Álava',est:'Por confirmar',hist:'Completa',mod:'Presencial'}],
+   [{id:'w11',t:'14:45',n:'Elena Ríos',est:'Confirmada',hist:'Completa',mod:'Presencial'},{id:'w12',t:'15:30',n:'Marco Vélez',est:'Por confirmar',hist:'Pendiente',mod:'Presencial'},{id:'w13',t:'17:45',n:'Lucía Mora',est:'Confirmada',hist:'Completa',mod:'Virtual · UTC−6'}],
+   'fer',
+   [{id:'w14',t:'09:00',n:'Iván Soto',est:'Confirmada',hist:'Completa',mod:'Presencial'},{id:'w15',t:'10:30',n:'Karla Gil',est:'Confirmada',hist:'Completa',mod:'Presencial'}]],
+  wait:[{n:'Carmen Ortiz',x:'Prefiere tardes · derivada'},{n:'Raúl Benítez',x:'Cualquier día · propio'}],
+  pacs:[
+   {n:'Andrea Salazar',ci:'09XXXXXX42',tipo:'Derivada',der:'Dr. [Derivador A]',plan:'1 de 2',hist:'Completa',next:'24 nov · 14:00',tag:'Hipertensión',arch:false},
+   {n:'María Torres',ci:'09XXXXXX17',tipo:'Derivada',der:'Dr. [Derivador B]',plan:'0 de 2',hist:'Pendiente',next:'10 nov · 15:30',tag:'Nueva',arch:false},
+   {n:'Luis Paredes',ci:'09XXXXXX88',tipo:'Propio',der:'',plan:'Por consulta',hist:'Pendiente',next:'10 nov · 14:45',tag:'Virtual',arch:false},
+   {n:'Jorge Molina',ci:'09XXXXXX05',tipo:'Propio',der:'',plan:'Por consulta',hist:'Completa',next:'10 nov · 16:15',tag:'Deportista',arch:false},
+   {n:'Lucía Mora',ci:'Pasaporte',tipo:'Propio',der:'',plan:'Por consulta',hist:'Completa',next:'12 nov · 17:45',tag:'Extranjera · UTC−6',arch:false},
+   {n:'Tomás Reyes (menor)',ci:'09XXXXXX61',tipo:'Derivada',der:'Dr. [Derivador A]',plan:'2 de 2',hist:'Completa',next:'Sin cita',tag:'Rep.: Silvia Reyes',arch:false},
+   {n:'Gabriela Sánchez',ci:'09XXXXXX74',tipo:'Propio',der:'',plan:'Por consulta',hist:'Completa',next:'Sin cita',tag:'Inactiva desde jun',arch:true}],
+  msgs:[
+   {tipo:'Código QR de acceso',cita:'mié 11 · 14:00',n:'Sofía Lara',canal:'WhatsApp',est:'Listo para enviar'},
+   {tipo:'Confirmación de asistencia',cita:'jue 12 · 15:30',n:'Marco Vélez',canal:'WhatsApp',est:'Listo para enviar'},
+   {tipo:'Recordatorio 3 h antes',cita:'hoy · 17:00',n:'Rosa Mejía',canal:'Correo',est:'Enviado'},
+   {tipo:'Agradecimiento + InBody',cita:'hoy · 14:00',n:'Andrea Salazar',canal:'Correo',est:'Falló'},
+   {tipo:'Bienvenida e historia clínica',cita:'mar 10 · 15:30',n:'María Torres',canal:'Correo',est:'Enviado'}],
+  pk:[
+   {n:'Andrea Salazar',c:'1 de 2',f:'10 y 24 nov',pago:'$70 · transferencia · 3 nov',est:'Al día'},
+   {n:'María Torres',c:'0 de 2',f:'10 nov · falta la 2.ª',pago:'—',est:'Por pagar'},
+   {n:'Tomás Reyes',c:'2 de 2',f:'3 y 17 nov',pago:'$70 · efectivo · 3 nov',est:'Por renovar'},
+   {n:'Paula Vera',c:'1 de 2',f:'9 nov · 2.ª reprogramada (1 vez)',pago:'$70 · transferencia · 2 nov',est:'Al día'}],
+  fer:[['Viernes 13 nov 2026','Feriado'],['24 dic 2026 a 2 ene 2027','Vacaciones']],
+  horario:{lv:'14:00 a 19:00',sab:'08:00 a 12:00'},
+  asis:true}
+};}
+let S=init();S.role='asi';S.screen='A0';
+
+const dev=document.getElementById('device'),bezel=document.getElementById('bezel'),scaler=document.getElementById('scaler'),stage=document.getElementById('stage');
+const LISTS={
+ pac:[['P0','Bienvenida y políticas'],['P1','Reservar cita'],['P2','Cita reservada'],['P3','Historia clínica'],['P4','Mi cita'],['P7','Mi código QR'],['P8','Mensajes que recibe'],['P6','Cita cancelada'],['P5','Enlace vencido']],
+ doc:[['D1','Inicio de sesión'],['D2','Agenda'],['D3','Detalle de cita'],['D4','Ficha del paciente'],['D6','Pacientes'],['D5','Avisos'],['D7','Más opciones'],['D8','Editar formulario'],['D9','Bloquear horario']],
+ asi:[['A0','Inicio de sesión'],['A1','Agenda y lista de espera'],['A2','Pacientes'],['A7','Ficha completa'],['A3','Mensajes e historial'],['A8','Plantillas de mensajes'],['A4','Paquetes y pagos'],['A5','Reportes'],['A6','Configuración']]};
+const STEPS={
+ pac:['Lea la bienvenida y toque «Reservar mi cita».','Elija modalidad, día y hora, y toque Reservar.','Toque «Llenar mi historia clínica» y avance los 4 pasos; acepte el consentimiento y envíe.','Entre a «Ver o cambiar mi cita» y confirme su asistencia.','Elija la fecha de su 2.ª consulta del plan.','Vea su código QR y los mensajes que recibirá.','Pruebe Reprogramar (solo se permite 1 vez) o Cancelar.'],
+ doc:['Ingrese con su correo o con Face ID.','Toque la cita de las 14:00 para ver el detalle.','Abra la ficha y recorra las pestañas; agregue una nota.','Vuelva y marque la cita como atendida.','Revise Avisos: apruebe o rechace la solicitud de excepción.','En «Más», edite una pregunta del formulario o bloquee un horario.'],
+ asi:['Ingrese con su correo y contraseña.','En Agenda, toque una cita y confírmela, o cancele otra.','Ofrezca el horario de las 17:15 a alguien de la lista de espera.','En Pacientes, registre un paciente nuevo (pruebe dejar un campo vacío).','En Mensajes, envíe los WhatsApp listos y reintente el correo fallido.','Abra la ficha completa de un paciente, edite su historia y suba un InBody.','Revise el historial y edite una plantilla de mensaje.','Registre el pago de María Torres y envíe un reporte al médico derivador.']};
+
+function go(sc,keep){ if(S.screen!==sc){S.hist.push(S.screen);} S.screen=sc; S.modal=null; if(!keep) S.a.drawer=null; render(true); }
+let toastT;
+function toast(m){ let t=document.getElementById('toast'); if(!t){t=document.createElement('div');t.id='toast';t.setAttribute('role','status');dev.appendChild(t);} t.textContent=m; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>{t.hidden=true},2600); }
+function modal(o){S.modal=o;render();}
+
+/* ============ PACIENTE ============ */
+function ensureBooked(){const p=S.p;if(!p.booked){p.booked={d:WEEKS[0].days[1],s:'15:30',mod:'Presencial'};}}
+function P0(){return `<div class="app"><div class="ahdr g"><span class="eyebrow" style="opacity:.9">NutriAgenda · Consultorio de Nutrición</span><h1 class="t">Bienvenida, María</h1><p style="margin:0;font-size:16px;line-height:1.4">La Dra. [Nombre] la atenderá en el consultorio [N.º]. Aquí puede reservar su consulta en pocos pasos.</p></div>
+ <div class="amain">
+ <div class="card"><h2 class="s">Así funciona</h2><p class="muted" style="font-size:15px">1. Elija el día y la hora de su consulta.<br>2. Llene su historia clínica (unos 10 minutos).<br>3. Confirme su asistencia cuando le escribamos.</p></div>
+ <div class="card"><h2 class="s">Políticas del programa</h2><p class="muted" style="font-size:15px;line-height:1.55">• La consulta dura de 30 a 45 minutos.<br>• El plan mensual incluye 2 consultas, cada 15 días. Las que no se usen en el mes se pierden.<br>• Puede reprogramar una vez, con anticipación.<br>• Si necesita cancelar, hágalo al menos 1 día antes.<br>• Hay 15 minutos de tolerancia; después, la cita se reprograma.<br>• Para entrar al edificio necesitará el código QR que le enviaremos 1 día antes.</p></div>
+ </div><div class="afoot"><button class="b" ${A('go','P1')}>Reservar mi cita</button><span class="muted" style="text-align:center;font-size:13px">Se abre en su navegador, sin instalar nada ni crear cuenta.</span></div></div>`;}
+function qr(){let h='';for(let y=0;y<21;y++)for(let x=0;x<21;x++){const f=(x<7&&y<7)||(x>13&&y<7)||(x<7&&y>13);const edge=f&&((x%14===0||x%14===6||y%14===0||y%14===6)||((x%14>=2&&x%14<=4)&&(y%14>=2&&y%14<=4)));const on=f?edge:((x*7+y*13+x*y)%3===0);h+=`<i style="background:${on?'#1C2B27':'#fff'}"></i>`;}return `<div aria-label="Código QR de ejemplo" role="img" style="display:grid;grid-template-columns:repeat(21,1fr);width:210px;height:210px;padding:12px;background:#fff;border-radius:12px;border:1px solid #E2E6E1">${h}</div>`;}
+function P7(){ensureBooked();const b=S.p.booked;return `<div class="app"><div class="ahdr"><button class="back" ${A('back')}>‹ Volver</button><h1 class="t">Mi código QR</h1></div>
+ <div class="amain" style="align-items:center;text-align:center">${qr()}
+ <b style="font-size:18px">${fmtS(b)}</b><p class="muted" style="font-size:15px">Presente este código en la recepción del edificio. Es válido solo para esta cita, desde 15 minutos antes.</p>
+ <div class="card" style="width:100%;box-sizing:border-box;text-align:left"><div class="kv"><span>Paciente</span><b>María Torres</b></div><div class="kv"><span>Cédula</span><b>09XXXXXX17</b></div><div class="kv"><span>Lugar</span><b>Consultorio [N.º]</b></div></div>
+ <p class="muted" style="font-size:13px">También le llega por WhatsApp 1 día antes de la cita.</p></div></div>`;}
+function P8(){ensureBooked();const b=S.p.booked,f=fmt(b),h=b.s;
+ const msg=(when,ch,txt,extra)=>`<div style="display:flex;flex-direction:column;gap:4px"><span style="align-self:center;background:#E1EAE5;color:#3D4A45;font-size:12px;font-weight:600;padding:3px 10px;border-radius:8px">${when} · ${ch}</span><div style="align-self:flex-start;max-width:86%;background:#fff;border-radius:4px 14px 14px 14px;padding:10px 12px;font-size:14.5px;line-height:1.45;box-shadow:0 1px 1px rgba(0,0,0,.08)">${txt}${extra||''}</div></div>`;
+ return `<div class="app" style="background:#EFEAE2"><div class="ahdr" style="background:#1E3D33;color:#fff;border:0"><button class="back" style="color:#fff" ${A('back')}>‹ Volver</button><b style="font-size:17px">Consultorio de Nutrición</b><span style="font-size:13px;opacity:.85">Ejemplo de los mensajes que recibe la paciente</span></div>
+ <div class="amain" style="gap:12px">
+ ${msg('Al reservar','Correo',`Bienvenida, María. Su cita quedó reservada para el <b>${f} a las ${h}</b>. Por favor, llene su historia clínica antes de la consulta: [enlace]`)}
+ ${msg('3 días antes','WhatsApp',`Buenas tardes, María 🗓️ Su cita de nutrición es el <b>${f} a las ${h}</b>. ¿Nos confirma su asistencia?`,`<button class="b sm o" style="margin-top:8px;width:100%" ${A('go','P4')}>Confirmar asistencia</button>`)}
+ ${msg('1 día antes','WhatsApp','Le recordamos su cita de mañana a las '+h+'. Adjuntamos su código QR para ingresar al edificio.',`<button class="b sm o" style="margin-top:8px;width:100%" ${A('go','P7')}>Ver código QR</button>`)}
+ ${msg('24 horas antes','Correo','Hola, María. Le recordamos su cita de mañana a las '+h+'.')}
+ ${msg('3 horas antes','Correo','Le esperamos hoy a las '+h+'. Hay 15 minutos de tolerancia.')}
+ ${msg('Después de la consulta','Correo','Gracias por su visita, María ✅ Adjuntamos el resultado de su InBody.',`<div style="margin-top:8px;display:flex;gap:8px;align-items:center;background:#F6F7F4;border-radius:8px;padding:8px;font-size:13px"><b style="color:#A3221B">PDF</b> InBody_${b.d[1]}nov2026.pdf</div>`)}
+ <p class="muted" style="text-align:center;font-size:12.5px">No se envían mensajes de noche ni en fin de semana.</p></div></div>`;}
+function P1(){
+ const p=S.p,wk=WEEKS[p.w],d=wk.days[p.di];
+ const title=p.mode==='repro'?'Reprogramar su cita':p.mode==='segunda'?'Elija su 2.ª consulta':'Hola, María';
+ const sub=p.mode==='repro'?'Elija el nuevo día y hora. Puede reprogramar una sola vez.':p.mode==='segunda'?'Su plan incluye 2 consultas al mes, cada 15 días aproximadamente.':'Reserve su consulta eligiendo la modalidad, el día y la hora.';
+ const minDay=p.mode==='segunda'&&p.booked?p.booked.d[1]+7:10;
+ const days=wk.days.map((x,i)=>{const dis=x[2]==='fer'||x[1]<minDay;return `<button class="opt dk day ${i===p.di&&!dis?'on':''}" ${dis?'disabled':A('day',i)}>${x[0]}<b>${x[1]}</b></button>`}).join('');
+ const dDis=d[2]==='fer'||d[1]<minDay;
+ const slots=dDis?'<p class="muted">Elija un día disponible.</p>':`<div class="g3">${slotsFor(d).map(s=>{const tk=taken(d[1],s);return `<button class="opt x ${p.slot===s&&!tk?'on':''}" ${tk?'disabled aria-label="'+s+' ocupado"':A('slot',s)}>${s}</button>`}).join('')}</div>`;
+ const can=p.slot&&!dDis;
+ const lbl=can?`${p.mode==='repro'?'Cambiar a':p.mode==='segunda'?'Elegir':'Reservar'} ${FULL[d[0]]} ${d[1]} · ${p.slot}`:'Elija una hora';
+ return `<div class="app">
+ <div class="ahdr g"><button class="back" style="color:#fff" ${A(p.mode==='nueva'?'go':'back',p.mode==='nueva'?'P0':undefined)}>‹ Volver</button>
+  <h1 class="t">${title}</h1><p style="margin:0;font-size:16px;line-height:1.4">${sub}</p></div>
+ <div class="amain">
+  <section style="display:flex;flex-direction:column;gap:10px"><h2 class="s">1. Modalidad</h2>
+   <div class="g2">${['Presencial','Virtual (Zoom)'].map(m=>`<button class="opt ${p.mod===m?'on':''}" ${A('mod',m)}>${m}</button>`).join('')}</div></section>
+  <section style="display:flex;flex-direction:column;gap:10px">
+   <div style="display:flex;justify-content:space-between;align-items:center"><h2 class="s">2. Día · ${wk.lbl}</h2>
+    <div style="display:flex;gap:6px"><button class="opt" style="min-height:40px;width:44px" ${p.w===0?'disabled':A('week',-1)} aria-label="Semana anterior">‹</button><button class="opt" style="min-height:40px;width:44px" ${p.w===2?'disabled':A('week',1)} aria-label="Semana siguiente">›</button></div></div>
+   <div class="g6">${days}</div>
+   ${p.w===0?'<p class="muted" style="font-size:13px">Lunes 9 ya pasó. Viernes 13: feriado, sin atención.</p>':''}</section>
+  <section style="display:flex;flex-direction:column;gap:10px"><h2 class="s">3. Hora disponible</h2>${slots}${p.mode==='nueva'?`<button class="back" style="font-size:14px" ${A('waitPac')}>¿No encuentra un horario? Anótese en la lista de espera</button>`:''}</section>
+  ${p.mode==='nueva'?'<div class="card" style="font-size:15px;line-height:1.4">Plan mensual: <b>le quedan 2 de 2 consultas</b> en noviembre. Después de reservar podrá elegir su 2.ª consulta.</div>':''}
+ </div>
+ <div class="afoot"><button class="b" ${can?A('reservar'):'disabled'}>${lbl}</button><span class="muted" style="text-align:center;font-size:13px">Se abre en su navegador, sin instalar nada. Enlace personal, vence en 72 horas.</span></div></div>`;
+}
+function P2(){
+ ensureBooked();const p=S.p,b=p.booked;
+ return `<div class="app"><div class="amain" style="padding-top:36px">
+ <div class="big"><div class="circle" style="background:#E3F0EA">${ICON.check}</div><h1 class="t">¡Su cita está reservada!</h1><p class="muted" style="font-size:16px">Le enviamos los detalles a su correo. La asistente le escribirá por WhatsApp para confirmar.</p></div>
+ <div class="card"><div class="kv"><span>Fecha</span><b>${fmt(b)}</b></div><div class="kv"><span>Hora</span><b>${b.s} (45 min)</b></div><div class="kv"><span>Modalidad</span><b>${b.mod}</b></div><div class="kv"><span>${b.mod==='Presencial'?'Lugar':'Enlace'}</span><b>${b.mod==='Presencial'?'Consultorio [N.º]':'Zoom (le llegará antes)'}</b></div>
+  <div class="kv"><span>Asistencia</span>${chip(p.conf?'Confirmada':'Por confirmar')}</div><div class="kv"><span>Historia clínica</span>${chip(p.hst)}</div>
+  <div class="kv"><span>2.ª consulta</span>${p.second?`<b>${fmtS(p.second)}</b>`:chip('Sin elegir')}</div></div>
+ <div class="card"><h2 class="s">Lo que viene</h2><p class="muted" style="font-size:15px">• 3 días antes: mensaje para confirmar su asistencia.<br>• 1 día antes: su código QR de acceso al edificio.<br>• 24 horas y 3 horas antes: recordatorios.</p><button class="back" style="font-size:14px" ${A('go','P8')}>Ver ejemplo de los mensajes ›</button></div>
+ </div><div class="afoot">
+ ${p.hst==='Completa'?'<button class="b" disabled>Historia clínica enviada</button>':`<button class="b" ${A('go','P3')}>${p.hst==='En progreso'?'Continuar mi historia clínica':'Llenar mi historia clínica'}</button>`}
+ ${p.second?'':`<button class="b o" ${A('segunda')}>Elegir mi 2.ª consulta del plan</button>`}
+ <button class="b o" ${A('go','P4')}>Ver o cambiar mi cita</button></div></div>`;
+}
+function P3(){
+ const p=S.p,st=p.hstep,names=['Datos personales y seguro','Antecedentes y hábitos','Alimentación habitual','Exámenes y consentimiento'];
+ let body='';
+ if(st===1) body=`<label class="fld">Nombres y apellidos *<input id="h1n" value="${esc(V('h1n','María Torres'))}"></label>
+  <div class="g2"><label class="fld">Cédula *<input id="h1c" value="${esc(V('h1c','09XXXXXX17'))}" inputmode="numeric"></label><label class="fld">Nacimiento *<input id="h1f" value="${esc(V('h1f','14/03/1990'))}"></label></div>
+  <label class="fld">¿Tiene seguro médico?<select id="h1s"><option>Sí · [Aseguradora]</option><option>No</option></select></label>
+  <label class="fld">Ocupación<input id="h1o" value="${esc(V('h1o','Contadora'))}"></label>
+  <button class="check" ${A('menor')} aria-pressed="${p.menor}"><span class="box2 ${p.menor?'on':''}">${p.menor?ICON.tick:''}</span>La consulta es para un menor de edad</button>
+  ${p.menor?`<div class="card"><h2 class="s">Datos del representante</h2><label class="fld">Nombre del representante *<input id="h1rn" value="${esc(V('h1rn',''))}"></label><label class="fld">Cédula del representante *<input id="h1rc" value="${esc(V('h1rc',''))}"></label><p class="muted" style="font-size:13px">El representante acepta el consentimiento en el paso 4.</p></div>`:''}`;
+ if(st===2) body=`<div style="display:flex;flex-direction:column;gap:8px"><span class="s">¿Tiene alguna de estas condiciones? *</span><div class="pills">${['Hipertensión','Diabetes','Tiroides','Colesterol alto','Ninguna'].map(c=>`<button class="pill ${p.cond.includes(c)?'on':''}" aria-pressed="${p.cond.includes(c)}" ${A('cond',c)}>${c}</button>`).join('')}</div></div>
+  <label class="fld">Medicamentos que toma actualmente *<textarea rows="2" id="h2m">${esc(V('h2m','Losartán 50 mg, una vez al día'))}</textarea></label>
+  <label class="fld">Alergias o intolerancias alimentarias<input id="h2a" value="${esc(V('h2a',''))}" placeholder="Ejemplo: lactosa, maní"></label>
+  <label class="fld">Actividad física semanal *<select id="h2f"><option>1 a 2 veces por semana</option><option>3 o más veces</option><option>Ninguna</option></select></label>`;
+ if(st===3) body=`<label class="fld">¿Cuántas comidas hace al día? *<select><option>3 comidas</option><option>4 a 5 comidas</option><option>1 a 2 comidas</option></select></label>
+  <label class="fld">Vasos de agua al día *<select><option>4 a 6</option><option>Menos de 4</option><option>Más de 6</option></select></label>
+  <label class="fld">Alimentos que no le gustan<input placeholder="Ejemplo: brócoli, pescado"></label>
+  <label class="fld">¿Qué quiere lograr con la consulta? *<textarea rows="3">Bajar de peso y controlar la presión.</textarea></label>`;
+ if(st===4) body=`<div style="display:flex;flex-direction:column;gap:8px"><span class="s">Exámenes de laboratorio</span>
+  <button class="b o" ${A('upload')}>+ Subir PDF o foto</button>${p.file?'<span class="muted">hemograma_oct2026.pdf · 820 KB · subido</span>':'<span class="muted">Opcional. Puede traerlos el día de la consulta.</span>'}</div>
+  <div class="card"><h2 class="s">Consentimiento de tratamiento de datos *</h2><p class="muted">Sus datos se usan solo para su atención nutricional y no se comparten con terceros. Puede pedir que se eliminen cuando lo desee. [Texto final pendiente de la doctora]</p>
+  <button class="check" ${A('consent')} aria-pressed="${p.consent}"><span class="box2 ${p.consent?'on':''}">${p.consent?ICON.tick:''}</span>Acepto el tratamiento de mis datos personales y de salud.</button></div>
+  <p class="muted" style="font-size:13px">Después de enviar no podrá editar sus respuestas; si necesita un cambio, escriba a la asistente.</p>`;
+ return `<div class="app"><div class="ahdr"><div style="display:flex;justify-content:space-between;align-items:center"><button class="back" ${A(st>1?'hprev':'back')}>‹ ${st>1?'Anterior':'Volver'}</button><span class="muted">Paso ${st} de 4</span></div>
+ <h1 class="t" style="font-size:22px">${names[st-1]}</h1><div class="prog">${[1,2,3,4].map(i=>`<i class="${i<=st?'on':''}"></i>`).join('')}</div></div>
+ <div class="amain">${body}</div>
+ <div class="afoot"><span class="muted" style="text-align:center;font-size:13px">Avance guardado automáticamente · * obligatorio</span><div class="g2">
+ <button class="b o" ${A('hlater')}>Seguir después</button>${st<4?`<button class="b" ${A('hnext')}>Siguiente</button>`:`<button class="b" ${p.consent?A('hsend'):'disabled'}>Enviar</button>`}</div></div></div>`;
+}
+function P3ok(){return `<div class="app"><div class="amain" style="justify-content:center"><div class="big"><div class="circle" style="background:#E3F0EA">${ICON.check}</div><h1 class="t">Historia clínica enviada</h1><p class="muted" style="font-size:16px">Gracias, María. La doctora la revisará antes de su consulta. Si necesita corregir algo, escriba a la asistente.</p></div></div><div class="afoot"><button class="b" ${A('go','P2')}>Volver a mi cita</button></div></div>`;}
+function P4(){
+ ensureBooked();const p=S.p,b=p.booked;
+ return `<div class="app"><div class="ahdr"><button class="back" ${A('go','P2')}>‹ Volver</button><h1 class="t">Mi cita</h1></div>
+ <div class="amain">
+ <div class="card"><div class="kv"><b style="font-size:18px">${fmtS(b)}</b>${chip(p.conf?'Confirmada':'Por confirmar')}</div><span class="muted" style="font-size:15px">${b.mod} · Consulta de seguimiento</span>
+ ${p.conf?`<div style="display:flex;gap:12px;align-items:center;background:#F6F7F4;border-radius:12px;padding:12px"><div style="width:58px;height:58px;border:2px dashed #9AA6A0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#55625E;text-align:center">QR</div><span class="muted">Asistencia confirmada. Su código QR le llegará 1 día antes de la cita.</span></div><button class="b o" ${A('go','P7')}>Ver mi código QR</button>`:`<button class="b" ${A('confirmar')}>Confirmar mi asistencia</button><span class="muted" style="font-size:13px">Puede confirmar hasta el día anterior a la cita.</span>`}</div>
+ <div class="card"><h2 class="s">Plan mensual · noviembre</h2><div class="g2">
+  <div style="background:#E3F0EA;border-radius:10px;padding:10px;font-size:14px"><b style="color:#1E6B57">1.ª consulta</b><br>${fmtS(b)}</div>
+  ${p.second?`<div style="background:#E3F0EA;border-radius:10px;padding:10px;font-size:14px"><b style="color:#1E6B57">2.ª consulta</b><br>${fmtS(p.second)}</div>`:`<button class="opt" style="font-size:14px" ${A('segunda')}>+ Elegir 2.ª consulta</button>`}</div>
+  <span class="muted" style="font-size:13px">Las consultas que no se usen en el mes se pierden.</span></div>
+ ${p.repro<1?`<button class="b o" ${A('repro')}>Reprogramar</button>`:'<button class="b o" disabled>Ya usó su reprogramación</button>'}
+ <button class="b r" ${A('cancelAsk')}>Cancelar cita</button>
+ <p class="muted">Puede reprogramar una vez con anticipación sin perder la consulta. Para cancelar, hágalo al menos 1 día antes. Si llega más de 15 minutos tarde, la cita se reprograma.</p>
+ </div></div>`;
+}
+function P5(){return `<div class="app"><div class="amain" style="justify-content:center;padding:32px 28px"><div class="big"><div class="circle" style="background:#FCEFD9">${ICON.clock}</div><h1 class="t">Este enlace ya no está activo</h1>
+ <p class="muted" style="font-size:16px">Por su seguridad, los enlaces vencen 72 horas después de enviados o cuando ya fueron usados. Sus datos están protegidos.</p><p class="muted" style="font-size:16px">Escriba a la asistente y le enviaremos uno nuevo.</p></div>
+ <button class="b" ${A('toast','Se abriría WhatsApp con el número del consultorio.')}>Escribir por WhatsApp</button>
+ <p class="muted" style="text-align:center;font-size:13px">Atención: lunes a viernes por la tarde y sábados hasta el mediodía.</p></div></div>`;}
+function P6(){return `<div class="app"><div class="amain" style="justify-content:center;padding:32px 28px"><div class="big"><div class="circle" style="background:#FBE4E2">${ICON.x}</div><h1 class="t">Su cita fue cancelada</h1>
+ <p class="muted" style="font-size:16px">Avisamos a la doctora y a la asistente. Recuerde que la consulta del plan de este mes no se recupera.</p></div>
+ <button class="b" ${A('newBooking')}>Reservar otra fecha</button></div></div>`;}
+
+/* ============ DOCTORA ============ */
+function bnav(on){const n=S.d.avisos.filter(a=>!a.read).length;return `<nav class="bnav"><button class="${on==='D2'?'on':''}" ${A('go','D2')}>${ICON.cal}Agenda</button><button class="${on==='D6'||on==='D4'?'on':''}" ${A('go','D6')}>${ICON.user}Pacientes</button><button class="${on==='D5'?'on':''}" ${A('go','D5')}>${ICON.bell}Avisos${n?`<span class="badge">${n}</span>`:''}</button><button class="${on==='D7'?'on':''}" ${A('go','D7')}>${ICON.more}Más</button></nav>`;}
+function D1(){return `<div class="app"><div class="amain" style="padding:64px 28px 28px;gap:24px">
+ <div style="display:flex;flex-direction:column;gap:10px"><div style="width:56px;height:56px;border-radius:16px;background:#1E6B57;color:#fff;display:flex;align-items:center;justify-content:center">${ICON.cal}</div><h1 class="t" style="font-size:30px">NutriAgenda</h1><p class="muted" style="font-size:16px">Ingrese para ver su agenda y sus pacientes.</p></div>
+ <label class="fld">Correo<input id="lmail" type="email" value="doctora@ejemplo.com"></label>
+ <label class="fld">Contraseña<input id="lpass" type="password" value="contrasena"></label>
+ <p class="err" id="lerr" hidden>Escriba su correo y contraseña.</p>
+ <button class="b" ${A('login')}>Ingresar</button>
+ <button class="b o" ${A('login','face')}>Ingreso rápido con Face ID</button>
+ <p class="muted" style="text-align:center;font-size:13px">La primera vez se ingresa con correo y contraseña. La sesión dura hasta 1 día.</p></div></div>`;}
+function D2(){
+ const d=S.d,ap=d.appts.filter(a=>!a.cancel);
+ const n=ap.length,c=ap.filter(a=>a.est==='Confirmada').length,hp=ap.filter(a=>a.hist==='Pendiente').length;
+ let body;
+ const strip=`<div class="g6">${WEEKS[0].days.map((x,i)=>`<button class="opt dk day ${i===d.day?'on':''}" style="min-height:50px" ${x[2]==='fer'?'disabled':A('dday',i)}>${x[0]}<b style="font-size:16px">${x[1]}</b></button>`).join('')}</div>`;
+ if(d.view==='lista'&&d.day!==1){
+  const col=S.a.week[d.day];
+  body=strip+col.map(e=>e.est==='Cancelada'?`<button class="appt dash" ${A('toast','Horario cancelado. La asistente puede ofrecerlo a la lista de espera.')}><div class="h"><b style="color:#55625E">${e.t}</b></div><div class="i"><b style="color:#4A5753">Horario cancelado</b></div></button>`:`<button class="appt" ${A('ficha',S.a.pacs.some(p=>p.n===e.n)?e.n:'Andrea Salazar')}><div class="h"><b>${e.t}</b><span>45 min</span></div><div class="i"><b>${esc(e.n)}</b><span class="muted">${e.mod}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${chip(e.est)}${e.hist==='Completa'?'<span class="chip ok">Historia completa</span>':'<span class="chip wa">Historia pendiente</span>'}</div></div></button>`).join('');
+ } else if(d.view==='lista'){
+  body=strip+d.appts.map(a=>a.cancel?`<button class="appt dash" ${A('toast','Horario cancelado. La asistente puede ofrecerlo a la lista de espera desde su panel.')}><div class="h"><b style="color:#55625E">${a.t}</b></div><div class="i"><b style="color:#4A5753">Horario cancelado</b><span class="muted">2 pacientes en lista de espera</span></div></button>`
+  :`<button class="appt" ${A('openA',a.id)}><div class="h"><b>${a.t}</b><span>${a.dur}</span></div><div class="i"><b>${a.n}</b><span class="muted">${a.mod} · ${a.tipo}${a.plan?' · '+a.plan:''}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${chip(a.est)}${chip(a.hist==='Completa'?'Completa':'Pendiente').replace('>Completa<','>Historia completa<').replace('>Pendiente<','>Historia pendiente<')}</div></div></button>`).join('');
+ } else {
+  const W=S.a.week;
+  body=WEEKS[0].days.map((x,i)=>{const col=W[i];if(col==='fer')return `<div class="card" style="background:#F1F2EF"><div class="kv"><b>${x[0]} ${x[1]}</b><span class="muted">Feriado</span></div></div>`;
+   return `<button class="appt" style="flex-direction:column;gap:6px" ${A('weekDay',i)}><div class="kv" style="width:100%"><b>${x[0]} ${x[1]}${i===1?' · hoy':''}</b><span class="muted">${col.filter(e=>e.est!=='Cancelada').length} citas</span></div><span class="muted" style="font-size:13.5px">${col.filter(e=>e.est!=='Cancelada').map(e=>e.t+' '+e.n.split(' ')[0]).join(' · ')}</span></button>`}).join('');
+ }
+ return `<div class="app"><div class="ahdr"><div class="kv"><h1 class="t">Agenda</h1><span class="muted">${d.view==='lista'?FULL[WEEKS[0].days[d.day][0]].replace(/^./,c=>c.toUpperCase())+' '+WEEKS[0].days[d.day][1]+' nov':'9 al 14 nov'}</span></div>
+ <div class="seg"><button class="${d.view==='lista'?'on':''}" ${A('dview','lista')}>Lista</button><button class="${d.view==='semana'?'on':''}" ${A('dview','semana')}>Semana</button></div>
+ ${d.view==='lista'&&d.day===1?`<span class="muted"><b style="color:#1C2B27">${n} citas</b> · ${c} confirmadas · ${hp} historias pendientes</span>`:''}</div>
+ <div class="amain" style="padding:14px 16px;gap:10px">${body}</div>${bnav('D2')}</div>`;
+}
+function curA(){return S.d.appts.find(a=>a.id===S.d.sel)||S.d.appts[0];}
+function D3(){
+ const a=curA();
+ const done=a.est==='Atendida'||a.est==='No asistió';
+ return `<div class="app"><div class="ahdr"><button class="back" ${A('go','D2')}>‹ Agenda</button><h1 class="t">${a.n}</h1><span class="muted" style="font-size:15px">Hoy · ${a.t} · ${a.dur} · ${a.mod}</span></div>
+ <div class="amain" style="padding:16px">
+ <div class="qa"><button ${A('toast','Se abriría WhatsApp con '+a.n+' ('+a.tel+').')}>${ICON.chat}WhatsApp</button><button ${A('toast','Se llamaría al '+a.tel+'.')}>${ICON.phone}Llamar</button><button ${A('ficha',a.n)}>${ICON.doc}Ficha</button><button ${done?'disabled style="opacity:.5"':A('moveAsk')}>${ICON.move}Mover</button></div>
+ <div class="card"><div class="kv"><span>Estado</span>${chip(a.est)}</div><div class="kv"><span>Historia clínica</span>${chip(a.hist)}</div><div class="kv"><span>Tipo</span><b>${a.tipo}</b></div>${a.plan?`<div class="kv"><span>Plan</span><b>${a.plan.replace('Plan ','Consulta ')}</b></div>`:''}${a.mod.startsWith('Virtual')?`<div class="kv"><span>Zoom</span><button class="b sm o" ${A('toast','Se abriría la reunión de Zoom.')}>Abrir reunión</button></div>`:''}</div>
+ <div class="card"><h2 class="s">Nota de la última consulta</h2><p class="muted" style="font-size:15px">${(S.d.notes[a.n]||['Sin notas previas.'])[0]}</p></div>
+ ${done?`<p class="muted" style="text-align:center">Cita marcada como «${a.est}».</p><button class="b o" ${A('undoA')}>Deshacer</button>`:`<div class="g2" style="margin-top:auto"><button class="b o" style="color:#1C2B27;border-color:#9AA6A0" ${A('markA','No asistió')}>No asistió</button><button class="b" ${A('markA','Atendida')}>Marcar atendida</button></div>`}
+ </div>${bnav('D2')}</div>`;
+}
+function D4(){
+ const d=S.d,n=d.fichaN,pac=S.a.pacs.find(x=>x.n===n)||S.a.pacs[0],notes=d.notes[n]||[];
+ let body='';
+ if(d.tab==='Resumen') body=`<div style="background:#1E6B57;color:#fff;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:4px"><span class="eyebrow" style="opacity:.9">Próxima cita</span><b style="font-size:18px">${pac.next==='Sin cita'?'Sin cita agendada':pac.next+' · Presencial'}</b><span style="font-size:14px">${pac.plan.includes('de 2')?'Plan mensual · '+pac.plan:'Paciente por consulta'}</span></div>
+  <div class="card"><h2 class="s">Últimas mediciones</h2><div class="g3" style="text-align:center"><div style="background:#F6F7F4;border-radius:10px;padding:10px 4px"><b style="font-size:18px">68,4 kg</b><br><span class="muted" style="font-size:12px">Peso · −1,2</span></div><div style="background:#F6F7F4;border-radius:10px;padding:10px 4px"><b style="font-size:18px">29,1 %</b><br><span class="muted" style="font-size:12px">Grasa · −0,8</span></div><div style="background:#F6F7F4;border-radius:10px;padding:10px 4px"><b style="font-size:18px">25,3 kg</b><br><span class="muted" style="font-size:12px">Músculo · +0,3</span></div></div></div>
+  <div class="card"><h2 class="s">Datos</h2><span class="muted" style="font-size:15px">C.I. ${pac.ci} · ${pac.tipo}${pac.der?' por '+pac.der:''}</span><span class="muted" style="font-size:15px">Etiqueta: ${pac.tag}</span></div>`;
+ if(d.tab==='Mediciones') body=`<div class="card"><h2 class="s">Historial InBody</h2><table class="mt"><thead><tr><th>Fecha</th><th>Peso</th><th>Grasa</th><th>Músculo</th></tr></thead><tbody><tr><td>27 oct</td><td>68,4 kg</td><td>29,1 %</td><td>25,3 kg</td></tr><tr><td>13 oct</td><td>69,0 kg</td><td>29,5 %</td><td>25,1 kg</td></tr><tr><td>6 oct</td><td>69,6 kg</td><td>29,9 %</td><td>25,0 kg</td></tr></tbody></table></div><button class="b o" ${A('toast','Se abriría el selector para adjuntar el PDF del InBody de hoy.')}>+ Adjuntar InBody de hoy</button>`;
+ if(d.tab==='Exámenes') body=['InBody · 27 oct 2026','InBody · 13 oct 2026','Hemograma · 20 oct 2026'].map(x=>`<button class="appt" style="align-items:center" ${A('pdf',x)}><div class="i"><b style="font-size:15px">${x}</b><span class="muted">PDF</span></div><span style="color:#1E6B57;font-weight:700">Ver</span></button>`).join('');
+ if(d.tab==='Notas') body=`<label class="fld">Nueva nota<textarea id="note" rows="3" data-nokeep placeholder="Escriba indicaciones o comentarios de la consulta"></textarea></label><button class="b" ${A('addNote')}>Guardar nota</button>${notes.map(x=>`<div class="card"><p class="muted" style="font-size:15px;color:#1C2B27">${esc(x)}</p></div>`).join('')||'<p class="muted">Aún no hay notas.</p>'}`;
+ return `<div class="app"><div class="ahdr" style="padding-bottom:0"><button class="back" ${A('back')}>‹ Volver</button><div class="kv"><h1 class="t">${esc(n)}</h1><span class="muted">HC-00${42+S.a.pacs.indexOf(pac)}</span></div>
+ <div class="tabs">${['Resumen','Mediciones','Exámenes','Notas'].map(t=>`<button class="${d.tab===t?'on':''}" ${A('tab',t)}>${t}</button>`).join('')}</div></div>
+ <div class="amain" style="padding:14px 16px;gap:12px">${body}</div>${bnav('D4')}</div>`;
+}
+function D6(){
+ const q=S.d.q.toLowerCase(),l=S.a.pacs.filter(p=>!p.arch&&(p.n.toLowerCase().includes(q)||p.ci.includes(q)));
+ return `<div class="app"><div class="ahdr"><h1 class="t">Pacientes</h1><label class="fld" style="font-weight:500"><span style="position:absolute;left:-9999px">Buscar</span><input id="dq" data-in="dq" value="${esc(S.d.q)}" placeholder="Buscar por nombre o cédula"></label></div>
+ <div class="amain" style="padding:14px 16px;gap:10px">${l.map(p=>`<button class="appt" style="align-items:center" ${A('ficha',p.n)}><div class="i"><b>${esc(p.n)}</b><span class="muted">${p.tipo} · ${p.plan} · próxima: ${p.next}</span></div>${chip(p.hist)}</button>`).join('')||'<p class="muted">No hay pacientes con ese nombre o cédula.</p>'}</div>${bnav('D6')}</div>`;
+}
+function D5(){
+ const av=S.d.avisos,n=av.filter(a=>!a.read).length;
+ return `<div class="app"><div class="ahdr"><div class="kv"><h1 class="t">Avisos</h1>${n?`<button class="b sm o" ${A('readAll')}>Marcar todo leído</button>`:'<span class="muted">Todo leído</span>'}</div></div>
+ <div class="amain" style="padding:14px 16px;gap:10px">${av.map((a,i)=>`<button class="av" style="${a.read?'opacity:.8':''}" ${A('aviso',i)}><span class="dot" style="background:${a.read?'#C9D1CC':a.c}"></span><div style="display:flex;flex-direction:column;gap:4px"><b style="font-size:16px">${a.t}</b><span class="muted" style="font-size:15px">${a.x}</span><span class="muted" style="font-size:12.5px">${a.w}</span></div></button>`).join('')}</div>${bnav('D5')}</div>`;
+}
+
+function D7(){return `<div class="app"><div class="ahdr"><h1 class="t">Más opciones</h1><span class="muted">Doctora · doctora@ejemplo.com</span></div>
+ <div class="amain" style="padding:14px 16px;gap:12px">
+ <div class="card"><h2 class="s">Resumen de octubre</h2><div class="g2" style="text-align:center"><div style="background:#F6F7F4;border-radius:10px;padding:10px"><b style="font-size:20px">18</b><br><span class="muted" style="font-size:12.5px">Consultas</span></div><div style="background:#F6F7F4;border-radius:10px;padding:10px"><b style="font-size:20px">3</b><br><span class="muted" style="font-size:12.5px">Pacientes nuevos</span></div><div style="background:#F6F7F4;border-radius:10px;padding:10px"><b style="font-size:20px">$ 490</b><br><span class="muted" style="font-size:12.5px">Ingresos</span></div><div style="background:#F6F7F4;border-radius:10px;padding:10px"><b style="font-size:20px">2</b><br><span class="muted" style="font-size:12.5px">Cancelaciones</span></div></div>
+ <span class="muted" style="font-size:13px">Los reportes en PDF o Excel se descargan desde el panel web.</span></div>
+ <button class="appt" style="align-items:center" ${A('go','D8')}><div class="i"><b style="font-size:16px">Editar formulario de historia clínica</b><span class="muted">Agregar, quitar o cambiar preguntas</span></div><span style="color:#1E6B57;font-weight:700">›</span></button>
+ <button class="appt" style="align-items:center" ${A('go','D9')}><div class="i"><b style="font-size:16px">Bloquear horario personal</b><span class="muted">Se refleja en la agenda y en Outlook</span></div><span style="color:#1E6B57;font-weight:700">›</span></button>
+ <button class="appt" style="align-items:center" ${A('logoutAllDoc')}><div class="i"><b style="font-size:16px">Cerrar sesión en todos los dispositivos</b><span class="muted">Si perdió su celular o computador</span></div><span style="color:#1E6B57;font-weight:700">›</span></button>
+ <button class="b r" ${A('logoutDoc')}>Cerrar sesión</button></div>${bnav('D7')}</div>`;}
+function D8(){const d=S.d,sec=d.form[d.fsec];
+ return `<div class="app"><div class="ahdr"><button class="back" ${A('go','D7')}>‹ Más</button><h1 class="t">Editar formulario</h1>
+ <div class="seg">${d.form.map((f,i)=>`<button class="${i===d.fsec?'on':''}" ${A('fsec',i)} aria-label="${f.s}">Paso ${i+1}</button>`).join('')}</div></div>
+ <div class="amain" style="padding:14px 16px;gap:10px"><h2 class="s">${sec.s}</h2>
+ ${sec.qs.map((q,i)=>`<div class="card" style="flex-direction:row;align-items:center;gap:10px;padding:12px"><div style="flex:1;display:flex;flex-direction:column;gap:6px"><b style="font-size:15px">${esc(q[0])}</b><button class="chip ${q[1]?'ok':'ne'}" style="border:0;align-self:flex-start;cursor:pointer;min-height:28px" ${A('freq',i)}>${q[1]?'Obligatoria':'Opcional'} · cambiar</button></div><button class="b sm r" style="min-height:38px" ${A('fdel',i)}>Quitar</button></div>`).join('')}
+ <button class="b o" ${A('faddAsk')}>+ Agregar pregunta</button></div>
+ <div class="afoot"><button class="b" ${A('fsaveAsk')}>Guardar cambios</button><span class="muted" style="text-align:center;font-size:13px">Los pacientes nuevos verán el formulario actualizado.</span></div></div>`;}
+function D9(){const bl=S.d.blocks;return `<div class="app"><div class="ahdr"><button class="back" ${A('go','D7')}>‹ Más</button><h1 class="t">Bloquear horario</h1><span class="muted">Para su agenda personal: esos horarios no se ofrecen a los pacientes.</span></div>
+ <div class="amain">
+ <label class="fld">Día<select id="bd"><option>Miércoles 11 nov</option><option>Jueves 12 nov</option><option>Sábado 14 nov</option><option>Lunes 16 nov</option></select></label>
+ <div class="g2"><label class="fld">Desde<select id="bf"><option>14:00</option><option>15:30</option><option>17:00</option></select></label><label class="fld">Hasta<select id="bh"><option>15:30</option><option>17:00</option><option>19:00</option></select></label></div>
+ <label class="fld">Motivo (solo lo ve usted)<input id="bm" placeholder="Ejemplo: congreso, trámite personal"></label>
+ <button class="b" ${A('blockDo')}>Bloquear horario</button>
+ ${bl.length?`<h2 class="s">Bloqueos registrados</h2>`+bl.map((x,i)=>`<div class="card" style="flex-direction:row;align-items:center"><div style="flex:1"><b>${x}</b></div><button class="b sm o" ${A('unblock',i)}>Quitar</button></div>`).join(''):''}
+ </div>${bnav('D7')}</div>`;}
+
+/* ============ ASISTENTE ============ */
+function wshell(sec,main,path){
+ const items=[['A1','Agenda'],['A2','Pacientes'],['A3','Mensajes'],['A4','Paquetes y pagos'],['A5','Reportes'],['A6','Configuración']];
+ return `<div class="wtop"><i></i><i></i><i></i><span>panel.nutriagenda.app/${path||items.find(x=>x[0]===sec)[1].toLowerCase().split(' ')[0]}</span></div>
+ <div class="wapp ${S.a.drawer?'hasdr':''}"><nav class="wside"><b>NutriAgenda</b>${items.map(x=>`<button class="${x[0]===sec?'on':''}" ${A('go',x[0])}>${x[1]}</button>`).join('')}<span class="me">Asistente · Ana P.</span></nav>
+ <div class="wmain">${main}</div></div>${drawer()}`;
+}
+function findEv(id){for(const c of S.a.week){if(Array.isArray(c)){const e=c.find(x=>x.id===id);if(e)return e;}}return null;}
+function drawer(){
+ const dr=S.a.drawer;if(!dr)return '';
+ if(dr.t==='ev'){const e=findEv(dr.id);if(!e)return '';
+  return `<aside class="drawer"><div class="kv"><h2 style="margin:0;font-size:20px">${esc(e.n)}</h2><button class="wb k" ${A('closeDr')}>Cerrar</button></div>
+  <div class="kv"><span>Hora</span><b>${e.t}</b></div><div class="kv"><span>Modalidad</span><b>${e.mod}</b></div><div class="kv"><span>Estado</span>${chip(e.est)}</div><div class="kv"><span>Historia clínica</span>${chip(e.hist)}</div>
+  ${e.est==='Cancelada'?`<p class="muted">El horario no se libera solo. Puede ofrecerlo a la lista de espera.</p><button class="wb" ${A('offer','Carmen Ortiz')}>Ofrecer a Carmen Ortiz</button>`:`
+  ${e.est!=='Confirmada'?`<button class="wb" ${A('evConf',e.id)}>Marcar como confirmada</button>`:''}
+  ${e.hist==='Pendiente'?`<button class="wb o" ${A('toast','Recordatorio para llenar la historia clínica listo en Mensajes.')}>Recordar historia clínica</button>`:''}
+  <button class="wb o" ${A('toast','Se abriría WhatsApp con '+e.n+'.')}>Escribir por WhatsApp</button>
+  <button class="wb r" ${A('evCancelAsk',e.id)}>Cancelar cita</button>`}</aside>`;}
+ if(dr.t==='pac'){const p=S.a.pacs.find(x=>x.n===dr.n);if(!p)return '';
+  return `<aside class="drawer"><div class="kv"><h2 style="margin:0;font-size:20px">${esc(p.n)}</h2><button class="wb k" ${A('closeDr')}>Cerrar</button></div>
+  <div class="kv"><span>Cédula</span><b>${p.ci}</b></div><div class="kv"><span>Tipo</span><b>${p.tipo}</b></div>${p.der?`<div class="kv"><span>Derivado por</span><b>${p.der}</b></div>`:''}<div class="kv"><span>Plan</span><b>${p.plan}</b></div><div class="kv"><span>Historia</span>${chip(p.hist)}</div><div class="kv"><span>Próxima cita</span><b>${p.next}</b></div>
+  <button class="wb" ${A('fichaWeb',p.n)}>Ver ficha completa</button>
+  <button class="wb o" ${A('copyLink',p.n)}>Copiar enlace de reserva</button>
+  ${p.hist==='Completa'?`<button class="wb o" ${A('toast','Se habilitó la edición de la historia clínica para la asistente.')}>Editar historia clínica</button>`:''}
+  <button class="wb ${p.arch?'o':'k'}" ${A('arch',p.n)}>${p.arch?'Reactivar paciente':'Archivar paciente'}</button>
+  <button class="wb r" ${A('delAsk',p.n)}>Eliminar datos (a pedido del paciente)</button></aside>`;}
+ return '';
+}
+function A0(){return `<div class="wtop"><i></i><i></i><i></i><span>panel.nutriagenda.app/ingresar</span></div>
+ <div style="height:764px;display:flex;align-items:center;justify-content:center;background:#F6F7F4"><form class="wcard" style="width:380px;padding:28px;gap:14px" onsubmit="return false">
+ <b style="font-size:24px">NutriAgenda</b><span class="muted">Panel del consultorio. Ingrese con su cuenta de asistente.</span>
+ <label class="fw">Correo<input id="am" type="email" value="${esc(V('am','asistente@ejemplo.com'))}"></label>
+ <label class="fw">Contraseña<input id="ap" type="password" value="${esc(V('ap','contrasena'))}"></label>
+ ${S.a.lerr?'<p class="err" role="alert">Escriba su correo y contraseña.</p>':''}
+ <button class="wb" type="button" style="min-height:44px" ${A('alogin')}>Ingresar</button>
+ <button class="wb k" type="button" ${A('toast','Se enviaría un enlace para restablecer la contraseña al correo registrado.')}>¿Olvidó su contraseña?</button>
+ <span class="muted" style="font-size:12.5px">La sesión dura hasta 1 día en este computador. Los cambios importantes piden un código de verificación.</span></form></div>`;}
+function A7(){const a=S.a,p=a.pacs.find(x=>x.n===a.ficha)||a.pacs[0],t=a.ftab;let body='';
+ if(t==='Datos')body=`<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px">${[['Cédula',p.ci],['Tipo',p.tipo],['Médico derivador',p.der||'—'],['WhatsApp','099 XXX XXXX'],['Correo','paciente@ejemplo.com'],['Seguro','[Aseguradora]'],['Plan',p.plan],['Próxima cita',p.next],['Etiqueta',p.tag]].map(x=>`<div class="wcard" style="gap:4px;padding:12px 14px"><span class="muted" style="font-size:13px">${x[0]}</span><b>${esc(x[1])}</b></div>`).join('')}</div>`;
+ if(t==='Historia clínica'){const qs=[['Condiciones de salud','Hipertensión'],['Medicamentos actuales','Losartán 50 mg, una vez al día'],['Alergias o intolerancias','Ninguna'],['Actividad física','1 a 2 veces por semana'],['Comidas al día','3 comidas'],['Objetivo','Bajar de peso y controlar la presión']];
+  body=`<div class="wcard"><div class="kv"><h2>Respuestas del paciente</h2>${chip(p.hist)}</div>${qs.map((q,i)=>a.hedit?`<label class="fw">${q[0]}<input id="hq${i}" value="${esc(V('hq'+i,q[1]))}"></label>`:`<div class="kv" style="border-top:1px solid #EEF0EC;padding-top:8px"><span>${q[0]}</span><b>${esc(V('hq'+i,q[1]))}</b></div>`).join('')}
+  <div style="display:flex;gap:8px">${a.hedit?`<button class="wb" ${A('hsave')}>Guardar cambios</button><button class="wb k" ${A('hedit')}>Cancelar</button>`:`<button class="wb o" ${A('hedit')}>Editar historia</button>`}</div><span class="muted" style="font-size:12.5px">El paciente no puede editar después de enviar; la asistente sí. Cada cambio queda en el registro de actividad.</span></div>`;}
+ if(t==='Citas')body=`<div class="wcard" style="padding:0;overflow:hidden"><table class="tbl"><thead><tr><th>Fecha</th><th>Modalidad</th><th>Estado</th><th>Nota</th></tr></thead><tbody><tr><td>24 nov · 14:00</td><td>Presencial</td><td>${chip('Confirmada')}</td><td>2.ª del plan</td></tr><tr><td>10 nov · 14:00</td><td>Presencial</td><td>${chip('Atendida')}</td><td>1.ª del plan</td></tr><tr><td>20 oct · 15:30</td><td>Presencial</td><td>${chip('Atendida')}</td><td>—</td></tr><tr><td>6 oct · 14:45</td><td>Virtual</td><td>${chip('Atendida')}</td><td>Primera consulta</td></tr></tbody></table></div>`;
+ if(t==='Pagos')body=`<div class="wcard" style="padding:0;overflow:hidden"><table class="tbl"><thead><tr><th>Fecha</th><th>Concepto</th><th>Monto</th><th>Método</th></tr></thead><tbody><tr><td>3 nov 2026</td><td>Plan mensual noviembre</td><td>$70,00</td><td>Transferencia</td></tr><tr><td>1 oct 2026</td><td>Plan mensual octubre</td><td>$70,00</td><td>Efectivo</td></tr></tbody></table></div>`;
+ if(t==='Archivos')body=`<div class="wcard">${a.files.map(f=>`<div class="kv" style="border-bottom:1px solid #EEF0EC;padding-bottom:8px"><span style="color:#1C2B27">${f}</span><button class="wb k" ${A('pdfWeb',f)}>Ver PDF</button></div>`).join('')}<button class="wb o" style="align-self:flex-start" ${A('upInbody')}>+ Subir InBody (PDF)</button><span class="muted" style="font-size:12.5px">El InBody se guarda en la historia clínica y se puede adjuntar al mensaje de agradecimiento.</span></div>`;
+ return wshell('A2',`<div class="wh"><div><button class="wb k" ${A('go','A2')}>‹ Pacientes</button></div></div>
+ <div class="wh"><div><h1>${esc(p.n)}</h1><span class="muted">HC-00${42+a.pacs.indexOf(p)} · ${p.tipo}${p.der?' · '+p.der:''}</span></div><div style="display:flex;gap:8px"><button class="wb o" ${A('copyLink',p.n)}>Copiar enlace de reserva</button><button class="wb" ${A('newApptAsk')}>+ Agendar cita</button></div></div>
+ <div class="fltr" style="align-self:flex-start">${['Datos','Historia clínica','Citas','Pagos','Archivos'].map(x=>`<button class="${t===x?'on':''}" ${A('ftab',x)}>${x}</button>`).join('')}</div>${body}`,'pacientes/ficha');}
+function mtabs(){return `<div class="fltr" style="align-self:flex-start">${['Hoy','Historial'].map(x=>`<button class="${S.screen==='A3'&&S.a.mtab===x?'on':''}" ${A('mtab',x)}>${x}</button>`).join('')}<button class="${S.screen==='A8'?'on':''}" ${A('go','A8')}>Plantillas</button></div>`;}
+function A8(){const a=S.a,t=a.tpls[a.tpl];
+ return wshell('A3',`<div class="wh"><div><h1>Plantillas de mensajes</h1><span class="muted">Textos que se envían automáticamente (correo) o quedan listos para enviar (WhatsApp).</span></div></div>${mtabs()}
+ <div class="wrow"><section class="wcard" style="flex:1;min-width:0;padding:0;overflow:hidden"><table class="tbl"><thead><tr><th>Mensaje</th><th>Cuándo</th><th>Canal</th></tr></thead><tbody>${a.tpls.map((x,i)=>`<tr class="click ${i===a.tpl?'sel':''}" ${A('tpl',i)}><td><b>${x[0]}</b></td><td>${x[1]}</td><td>${x[2]}</td></tr>`).join('')}</tbody></table></section>
+ <aside class="wcard" style="width:360px;flex-shrink:0"><h2>${t[0]} · ${t[1]}</h2>
+ <label class="fw">Canal<select id="tch">${['Correo','WhatsApp'].map(c=>`<option ${c===t[2]?'selected':''}>${c}</option>`).join('')}</select></label>
+ <label class="fw">Texto<textarea id="ttx" data-nokeep rows="7" style="font:400 14.5px var(--app);padding:10px;border:1px solid #C9D1CC;border-radius:8px;resize:vertical">${esc(t[3])}</textarea></label>
+ <div style="display:flex;gap:6px;flex-wrap:wrap">${['{nombre}','{fecha}','{hora}','{enlace}','{proxima}'].map(v=>`<button class="chip ne" style="border:0;cursor:pointer;min-height:28px" ${A('tvar',v)}>${v}</button>`).join('')}</div>
+ <button class="wb" ${A('tsave')}>Guardar plantilla</button>
+ <span class="muted" style="font-size:12.5px">Trato de usted, tono formal y cercano. Si un envío cae de noche o en fin de semana, se adelanta al último horario hábil (pendiente de confirmar con la doctora).</span></aside></div>`,'mensajes/plantillas');}
+function A1(){
+ const a=S.a,W=a.week;
+ let grid;
+ if(a.view==='Semana'){
+  grid=`<section style="flex:1;min-width:0"><div class="wk">${WEEKS[0].days.map((x,i)=>`<div class="hd ${i===1?'today':''}">${x[0]} ${x[1]}${i===1?' · hoy':''}${W[i]==='fer'?' · feriado':''}</div>`).join('')}
+  ${W.map(c=>c==='fer'?'<div class="col fer"></div>':`<div class="col">${c.map(e=>{const cls=e.est==='Cancelada'?'no':e.est==='Ofrecido'?'ne':(e.est==='Por confirmar'||e.hist==='Pendiente')?'wa':'ok';const sub=e.est==='Cancelada'?'Cancelada · ofrecer':e.est==='Ofrecido'?'Ofrecido, esperando':e.est==='Por confirmar'?'Por confirmar':e.hist==='Pendiente'?'Historia pendiente':e.mod.startsWith('Virtual')?e.mod:'Confirmada';return `<button class="ev ${cls}" ${A('ev',e.id)}><small>${e.t}</small>${esc(e.n)}<br><span style="font-size:12px">${sub}</span></button>`}).join('')}</div>`).join('')}</div></section>`;
+ } else {
+  const rows=[];W.forEach((c,i)=>{if(c!=='fer')c.forEach(e=>rows.push([WEEKS[0].days[i],e]));});
+  grid=`<section class="wcard" style="flex:1;min-width:0;padding:0;overflow:hidden"><table class="tbl"><thead><tr><th>Día</th><th>Hora</th><th>Paciente</th><th>Modalidad</th><th>Estado</th><th>Historia</th></tr></thead><tbody>${rows.map(([d,e])=>`<tr class="click" ${A('ev',e.id)}><td>${d[0]} ${d[1]}</td><td>${e.t}</td><td><b>${esc(e.n)}</b></td><td>${e.mod}</td><td>${chip(e.est==='Ofrecido'?'Ofrecido':e.est)}</td><td>${chip(e.hist)}</td></tr>`).join('')}</tbody></table></section>`;
+ }
+ const pend=a.msgs.filter(m=>m.est==='Listo para enviar').length,pagos=a.pk.filter(p=>p.est==='Por pagar').length;
+ return wshell('A1',`<div class="wh"><div><h1>Agenda · semana del 9 al 14 de noviembre</h1><span class="muted">Sincronizada con Outlook hace 2 min · los cambios hechos en Outlook también se reflejan aquí</span></div>
+ <div style="display:flex;gap:8px"><div class="fltr">${['Semana','Lista'].map(v=>`<button class="${a.view===v?'on':''}" ${A('aview',v)}>${v}</button>`).join('')}</div><button class="wb" ${A('newApptAsk')}>+ Agendar cita</button></div></div>
+ <div class="wrow">${grid}
+ <aside class="rside" style="width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:14px">
+  <div class="wcard"><h2>Lista de espera</h2>${a.wait.map((w,i)=>`<div class="kv" style="font-size:14px;${i?'border-top:1px solid #EEF0EC;padding-top:10px':''}"><span style="color:#1C2B27"><b>${w.n}</b><br><span class="muted" style="font-size:13px">${w.x}</span></span>${a.offered===w.n?chip('Ofrecido'):`<button class="wb o" ${a.offered?'disabled':A('offer',w.n)}>Ofrecer 17:15</button>`}</div>`).join('')}
+  <button class="wb k" ${A('waitAsk')}>+ Agregar a la lista</button></div>
+  <div class="wcard"><h2>Por hacer hoy</h2>
+   <button class="wb k" style="text-align:left" ${A('go','A3')}>${pend?pend+' WhatsApp listos para enviar':'Mensajes al día'}</button>
+   <button class="wb k" style="text-align:left" ${A('go','A4')}>${pagos?pagos+' pago por registrar':'Pagos al día'}</button>
+   <button class="wb k" style="text-align:left" ${A('go','A2')}>${a.pacs.filter(p=>p.hist==='Pendiente'&&!p.arch).length} historias pendientes</button></div>
+ </aside></div>`);
+}
+function A2(){
+ const a=S.a,q=a.q.toLowerCase();
+ const l=a.pacs.filter(p=>(a.filt==='Archivados'?p.arch:!p.arch)&&(a.filt==='Derivados'?p.tipo.startsWith('Derivad'):a.filt==='Propios'?p.tipo==='Propio':true)&&(p.n.toLowerCase().includes(q)||p.ci.toLowerCase().includes(q)));
+ return wshell('A2',`<div class="wh"><h1>Pacientes</h1><div style="display:flex;gap:8px;align-items:center"><input id="aq" data-in="aq" value="${esc(a.q)}" placeholder="Buscar por nombre o cédula" aria-label="Buscar paciente" style="font:400 14.5px var(--app);min-height:40px;width:250px;padding:0 12px;border:1px solid #C9D1CC;border-radius:9px">
+ <div class="fltr">${['Activos','Derivados','Propios','Archivados'].map(f=>`<button class="${a.filt===f?'on':''}" ${A('filt',f)}>${f}</button>`).join('')}</div></div></div>
+ <div class="wrow"><section class="wcard" style="flex:1;min-width:0;padding:0;overflow:hidden"><table class="tbl"><thead><tr><th>Paciente</th><th>Tipo</th><th>Plan</th><th>Historia</th><th>Próxima cita</th><th>Etiqueta</th></tr></thead><tbody>
+ ${l.map(p=>`<tr class="click ${a.drawer&&a.drawer.n===p.n?'sel':''}" ${A('pac',p.n)}><td><b>${esc(p.n)}</b><br><span class="muted" style="font-size:13px">C.I. ${p.ci}</span></td><td>${p.tipo}${p.der?`<br><span class="muted" style="font-size:13px">${p.der}</span>`:''}</td><td>${p.plan}</td><td>${chip(p.hist)}</td><td>${p.next}</td><td>${esc(p.tag)}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">No hay pacientes en esta vista.</td></tr>'}
+ </tbody></table></section>
+ <form class="wcard rside" style="width:310px;flex-shrink:0" id="regForm" onsubmit="return false"><h2>Registrar paciente</h2>
+  <label class="fw">Nombres y apellidos *<input id="rn" value="${esc(V('rn',''))}"></label>
+  <div class="g2"><label class="fw">Cédula *<input id="rc" value="${esc(V('rc',''))}" inputmode="numeric" placeholder="10 dígitos"></label><label class="fw">WhatsApp *<input id="rw" value="${esc(V('rw',''))}" placeholder="09XXXXXXXX"></label></div>
+  <label class="fw">Correo *<input id="re" value="${esc(V('re',''))}" type="email"></label>
+  <div class="g2"><label class="fw">Tipo *<select id="rt"><option>Derivado</option><option>Propio</option></select></label><label class="fw">Seguro<select id="rs"><option>Ninguno</option><option>[Aseguradora]</option></select></label></div>
+  <label class="fw">Médico derivador y contacto<input id="rd" value="${esc(V('rd',''))}" placeholder="Dr. … · teléfono"></label>
+  <label style="display:flex;gap:8px;align-items:center;font-size:13.5px"><input type="checkbox" id="rm" ${V('rm',false)?'checked':''}>Es menor de edad (pedir datos del representante)</label>
+  ${a.err?`<p class="err" role="alert">${a.err}</p>`:''}
+  <button class="wb" type="button" ${A('reg')}>Guardar y generar enlace de reserva</button></form></div>`);
+}
+function msgText(m){
+ const nm=m.n.split(' ')[0];
+ const t={'Código QR de acceso':`Buenas tardes, ${nm}. Le recordamos su cita de nutrición <b>mañana, ${m.cita.replace(' · ',' a las ')}</b>, en el consultorio [N.º].<br><br>Adjuntamos su código QR de acceso al edificio; preséntelo en recepción.<br><br>Si necesita reprogramar: [enlace]`,
+ 'Confirmación de asistencia':`Buenas tardes, ${nm}. Su cita de nutrición es el <b>${m.cita.replace(' · ',' a las ')}</b>.<br><br>¿Nos confirma su asistencia? Puede hacerlo aquí: [enlace]`,
+ 'Recordatorio 3 h antes':`Hola, ${nm}. Le esperamos <b>${m.cita.replace(' · ',' a las ')}</b>. Recuerde llegar 10 minutos antes; hay 15 minutos de tolerancia.`,
+ 'Agradecimiento + InBody':`Gracias por su visita, ${nm}. Adjuntamos el resultado de su InBody de hoy. Su próxima cita es el 24 de noviembre a las 14:00.`,
+ 'Bienvenida e historia clínica':`Bienvenida, ${nm}. Su cita quedó reservada para el <b>${m.cita.replace(' · ',' a las ')}</b>.<br><br>Por favor, llene su historia clínica antes de la consulta: [enlace]`};
+ return t[m.tipo];
+}
+function A3(){
+ const a=S.a,m=a.msgs[a.msg];
+ if(a.mtab==='Historial')return wshell('A3',`<div class="wh"><div><h1>Historial de mensajes</h1><span class="muted">Todo lo enviado a cada paciente, con fecha, canal y estado.</span></div></div>${mtabs()}
+ <section class="wcard" style="padding:0;overflow:hidden"><table class="tbl"><thead><tr><th>Fecha</th><th>Paciente</th><th>Mensaje</th><th>Canal</th><th>Estado</th></tr></thead><tbody>${[['9 nov 18:10','Andrea Salazar','Código QR de acceso','WhatsApp','Enviado'],['9 nov 14:00','Andrea Salazar','Recordatorio 24 h antes','Correo','Enviado'],['7 nov 15:02','Luis Paredes','Confirmación de asistencia','WhatsApp','Enviado'],['6 nov 16:40','Diego Cruz','Recordatorio de historia clínica','WhatsApp','Enviado'],['6 nov 11:15','Paula Vera','Bienvenida e historia clínica','Correo','Enviado'],['5 nov 17:30','Tomás Reyes','Agradecimiento + InBody','Correo','Enviado']].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${chip(r[4])}</td></tr>`).join('')}</tbody></table></section>`,'mensajes/historial');
+ return wshell('A3',`<div class="wh"><div><h1>Mensajes de hoy</h1><span class="muted">Los correos salen solos. Los WhatsApp quedan listos: revise y envíe con un clic. Nada se envía de noche ni en fin de semana.</span></div></div>${mtabs()}
+ <div class="wrow"><section class="wcard" style="flex:1;min-width:0;padding:0;overflow:hidden"><table class="tbl"><thead><tr><th>Mensaje</th><th>Paciente</th><th>Canal</th><th>Estado</th><th>Acción</th></tr></thead><tbody>
+ ${a.msgs.map((x,i)=>`<tr class="click ${i===a.msg?'sel':''}" ${A('msg',i)}><td><b>${x.tipo}</b><br><span class="muted" style="font-size:13px">Cita ${x.cita}</span></td><td>${x.n}</td><td>${x.canal}</td><td>${x.est==='Falló'?chip('Falló'):chip(x.est)}</td><td>${x.est==='Listo para enviar'?`<button class="wb" ${A('send',i)}>Abrir WhatsApp</button>`:x.est==='Falló'?`<button class="wb r" ${A('send',i)}>Reintentar</button>`:'<span class="muted">Ver</span>'}</td></tr>`).join('')}
+ </tbody></table></section>
+ <aside class="wcard" style="width:320px;flex-shrink:0"><h2>Vista previa · ${m.tipo}</h2><div class="bubble">${msgText(m)}</div>
+ ${m.tipo==='Código QR de acceso'?'<div style="height:90px;border:1px dashed #C9D1CC;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#55625E">[Imagen del código QR]</div>':''}
+ <span class="muted" style="font-size:13px">Tono formal y cercano, trato de usted. Plantillas editables en Configuración.</span>
+ ${m.est==='Enviado'?`<button class="wb" disabled>Enviado</button>`:`<button class="wb" ${A('send',a.msg)}>${m.canal==='WhatsApp'?'Abrir en WhatsApp Web':'Reintentar envío'}</button>`}</aside></div>`);
+}
+function A4(){
+ const a=S.a,act=a.pk.filter(p=>p.est!=='Cerrado').length,ren=a.pk.filter(p=>p.est==='Por renovar').length;
+ return wshell('A4',`<div class="wh"><h1>Paquetes y pagos · noviembre 2026</h1></div>
+ <div class="tiles"><div class="tile"><span>Planes activos</span><b>${act}</b></div><div class="tile"><span>Por renovar</span><b style="color:#8A4B00">${ren}</b></div><div class="tile"><span>Consultas perdidas</span><b>1</b></div><div class="tile"><span>Ingresos del mes</span><b>$ ${a.ingresos}</b></div></div>
+ <div class="wrow"><section class="wcard" style="flex:1;min-width:0;padding:0;overflow:hidden"><table class="tbl"><thead><tr><th>Paciente</th><th>Consultas</th><th>Fechas elegidas</th><th>Último pago</th><th>Estado</th></tr></thead><tbody>
+ ${a.pk.map(p=>`<tr class="click" ${A('pkSel',p.n)}><td><b>${p.n}</b></td><td>${p.c}</td><td>${p.f}</td><td>${p.pago}</td><td>${chip(p.est)}</td></tr>`).join('')}</tbody></table></section>
+ <form class="wcard" style="width:300px;flex-shrink:0" onsubmit="return false"><h2>Registrar pago</h2>
+  <label class="fw">Paciente *<select id="pp">${a.pk.map(p=>`<option ${p.n===(a.pkSel||'María Torres')?'selected':''}>${p.n}</option>`).join('')}<option>Luis Paredes</option><option>Jorge Molina</option></select></label>
+  <label class="fw">Concepto *<select id="pc"><option>Plan mensual (2 consultas)</option><option>Consulta individual</option></select></label>
+  <div class="g2"><label class="fw">Monto *<input id="pm" value="${esc(V('pm','70,00'))}"></label><label class="fw">Fecha *<input id="pf" value="${esc(V('pf','10/11/2026'))}"></label></div>
+  <fieldset style="border:0;padding:0;margin:0;display:flex;gap:14px;font-size:14px"><legend style="font-weight:600;padding-bottom:6px;font-size:13.5px">Método *</legend><label><input type="radio" name="pmet" value="transferencia" checked> Transferencia</label><label><input type="radio" name="pmet" value="efectivo"> Efectivo</label></fieldset>
+  ${a.perr?`<p class="err" role="alert">${a.perr}</p>`:''}
+  <button class="wb" type="button" ${A('pay')}>Guardar pago</button>
+  <span class="muted" style="font-size:12.5px">Pago completo. Sin descuentos ni devoluciones; las excepciones las autoriza la doctora.</span></form></div>`);
+}
+const REP={
+ 'Pacientes derivados':{'Dr. [Derivador A]':[['Andrea Salazar','09XXXXXX42','6 y 20 oct','Completo','—'],['Tomás Reyes','09XXXXXX61','8 y 22 oct','Completo','Paciente nuevo'],['Diego Cruz','09XXXXXX30','14 oct','1 de 2','Canceló la 2.ª consulta']],'Dr. [Derivador B]':[['Paula Vera','09XXXXXX12','27 oct','Inicia','Paciente nuevo'],['Rosa Mejía','09XXXXXX93','9 y 23 oct','Completo','—']]},
+ 'Pacientes privados':{'Todos':[['Jorge Molina','09XXXXXX05','2 oct','Por consulta','Paciente nuevo'],['Luis Paredes','09XXXXXX88','16 oct','Por consulta','Virtual'],['Lucía Mora','Pasaporte','21 oct','Por consulta','Extranjera']]}};
+function A5(){
+ const a=S.a,isD=a.rep==='Pacientes derivados',meds=Object.keys(REP[a.rep]),med=meds.includes(a.med)?a.med:meds[0],rows=REP[a.rep][med];
+ const ing=isD?rows.filter(r=>r[3]!=='Inicia').length*70:rows.length*35;
+ return wshell('A5',`<div class="wh"><h1>Reportes mensuales</h1></div>
+ <section class="wcard" style="flex-direction:row;flex-wrap:wrap;align-items:flex-end;gap:14px">
+  <label class="fw">Reporte<select id="rr" data-in="rep" style="min-width:200px">${Object.keys(REP).map(k=>`<option ${k===a.rep?'selected':''}>${k}</option>`).join('')}</select></label>
+  <label class="fw">Desde<input value="01/10/2026" style="width:130px"></label><label class="fw">Hasta<input value="31/10/2026" style="width:130px"></label>
+  ${isD?`<label class="fw">Médico derivador<select data-in="med" style="min-width:190px">${meds.map(k=>`<option ${k===med?'selected':''}>${k}</option>`).join('')}</select></label>`:''}
+  <div style="display:flex;gap:8px;margin-left:auto"><button class="wb o" ${A('dl','xlsx')}>Descargar Excel</button><button class="wb o" ${A('dl','pdf')}>Descargar PDF</button>${isD?`<button class="wb" ${A('sendRep',med)}>Enviar al médico derivador</button>`:''}</div></section>
+ <div class="tiles"><div class="tile"><span>Pacientes atendidos</span><b>${rows.length}</b></div><div class="tile"><span>Consultas realizadas</span><b>${rows.reduce((s,r)=>s+(r[2].includes(' y ')?2:1),0)}</b></div><div class="tile"><span>Pacientes nuevos</span><b>${rows.filter(r=>r[4]==='Paciente nuevo').length}</b></div><div class="tile"><span>Ingresos</span><b>$ ${ing}</b></div></div>
+ <section class="wcard" style="padding:0;overflow:hidden"><div style="padding:13px 16px;border-bottom:1px solid #EEF0EC;font-size:14.5px"><b>Vista previa</b> · ${a.rep}${isD?' de '+med:''} · octubre 2026</div>
+ <table class="tbl"><thead><tr><th>Paciente</th><th>Cédula</th><th>Fechas atendidas</th><th>Plan</th><th>Observación</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td style="${r[4].startsWith('Canceló')?'color:#A3221B':''}">${r[4]}</td></tr>`).join('')}</tbody></table></section>`);
+}
+function A6(){
+ const a=S.a;
+ return wshell('A6',`<div class="wh"><h1>Configuración</h1></div>
+ <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+ <section class="wcard"><h2>Horario de atención</h2><div class="kv"><span>Lunes a viernes</span><b>${a.horario.lv}</b></div><div class="kv"><span>Sábado</span><b>${a.horario.sab}</b></div><div class="kv"><span>Duración de consulta</span><b>45 min (hasta 1 h)</b></div><div class="kv"><span>Tolerancia</span><b>15 min</b></div><div class="kv"><span>Envío de mensajes</span><b>L a V, 08:00 a 19:00</b></div><button class="wb o" style="align-self:flex-start" ${A('horAsk')}>Editar horario</button></section>
+ <section class="wcard"><h2>Feriados y vacaciones</h2>${a.fer.map((f,i)=>`<div class="kv"><span>${f[0]}</span><span style="display:flex;gap:8px;align-items:center"><b>${f[1]}</b><button class="wb k" style="min-height:30px;padding:0 8px" ${A('delFer',i)} aria-label="Quitar ${f[0]}">Quitar</button></span></div>`).join('')}<span class="muted" style="font-size:13px">Los horarios de estos días no se muestran a los pacientes.</span><button class="wb o" style="align-self:flex-start" ${A('ferAsk')}>+ Agregar fecha</button></section>
+ <section class="wcard"><h2>Formulario de historia clínica</h2>${['Datos personales y seguro · 6','Antecedentes y hábitos · 8','Alimentación habitual · 7','Exámenes y consentimiento · 3'].map((x,i)=>`<div class="kv" style="background:#F6F7F4;border-radius:8px;padding:8px 10px"><span style="color:#1C2B27">${i+1}. ${x.split(' · ')[0]}</span><span class="muted" style="font-size:13px">${x.split(' · ')[1]} preguntas</span></div>`).join('')}<button class="wb o" style="align-self:flex-start" ${A('toast','Solo la doctora puede editar las preguntas del formulario.')}>Editar preguntas</button></section>
+ <section class="wcard"><h2>Usuarios y accesos</h2><div class="kv"><span style="color:#1C2B27"><b>Doctora</b><br><span class="muted" style="font-size:13px">Administradora · iPhone</span></span>${chip('Activa')}</div>
+  <div class="kv" style="border-top:1px solid #EEF0EC;padding-top:10px"><span style="color:#1C2B27"><b>Ana P.</b><br><span class="muted" style="font-size:13px">Asistente · computador</span></span>${a.asis?`<button class="wb r" ${A('accAsk','quitar')}>Quitar acceso</button>`:`<span style="display:flex;gap:6px;align-items:center">${chip('Sin acceso')}<button class="wb o" ${A('accAsk','dar')}>Dar acceso</button></span>`}</div>
+  <button class="wb k" style="align-self:flex-start" ${A('logoutAsk')}>Cerrar sesión en todos los dispositivos</button><span class="muted" style="font-size:13px">Los cambios importantes piden un código de verificación (2 pasos).</span></section>
+ <section class="wcard"><h2>Integraciones</h2><div class="kv"><span>Outlook Calendar (personal)</span><b style="color:#1E6B57">Conectado · ambos sentidos</b></div><div class="kv"><span>Correo de envío (Gmail)</span><b style="color:#1E6B57">Conectado</b></div><div class="kv"><span>WhatsApp</span><b>Envío asistido</b></div><button class="wb o" style="align-self:flex-start" ${A('toast','Sincronizado con Outlook: 18 citas al día.')}>Sincronizar ahora</button></section>
+ <section class="wcard"><h2>Datos y respaldos</h2><div class="kv"><span>Último respaldo</span><b>Domingo 8 nov · 02:00</b></div><div class="kv"><span>Frecuencia</span><b>Semanal</b></div><div class="kv"><span>Registro de actividad</span><b>Activo</b></div><button class="wb o" style="align-self:flex-start" ${A('logAsk')}>Ver registro de actividad</button></section>
+ </div>`);
+}
+
+const SCREENS={P0,P1,P2,P3,P3ok,P4,P5,P6,P7,P8,D1,D2,D3,D4,D5,D6,D7,D8,D9,A0,A1,A2,A3,A4,A5,A6,A7,A8};
+
+/* ============ ACCIONES ============ */
+const ACT={
+ go:s=>go(s), back:()=>{S.screen=S.hist.pop()||LISTS[S.role][0][0];S.modal=null;render(true);},
+ toast:m=>toast(m), closeModal:()=>{S.modal=null;render();},
+ // paciente
+ mod:m=>{S.p.mod=m;render();}, week:d=>{S.p.w+=+d;S.p.di=S.p.mode==='segunda'?0:0;S.p.slot=null;const wk=WEEKS[S.p.w];const min=S.p.mode==='segunda'&&S.p.booked?S.p.booked.d[1]+7:10;S.p.di=Math.max(0,wk.days.findIndex(x=>x[2]!=='fer'&&x[1]>=min));render();},
+ day:i=>{S.p.di=+i;S.p.slot=null;render();}, slot:s=>{S.p.slot=s;render();},
+ reservar:()=>{const p=S.p,b={d:WEEKS[p.w].days[p.di],s:p.slot,mod:p.mod};
+  if(p.mode==='nueva'){p.booked=b;p.conf=false;p.cancelled=false;go('P2');toast('Cita reservada. Le enviamos un correo con los detalles.');}
+  else if(p.mode==='repro'){p.booked=b;p.repro++;p.conf=false;p.mode='nueva';S.hist=[];go('P4');toast('Cita reprogramada a '+fmtS(b)+'.');}
+  else {p.second=b;p.mode='nueva';S.hist=[];go('P2');toast('2.ª consulta reservada: '+fmtS(b)+'.');}
+  p.slot=null;},
+ segunda:()=>{ensureBooked();const p=S.p;p.mode='segunda';p.w=Math.min(2,WEEKS.findIndex(w=>w.days.some(x=>x[1]===p.booked.d[1]))+2);p.di=0;p.slot=null;const wk=WEEKS[p.w],min=p.booked.d[1]+7;p.di=Math.max(0,wk.days.findIndex(x=>x[2]!=='fer'&&x[1]>=min));go('P1');},
+ repro:()=>{const p=S.p;p.mode='repro';p.w=0;p.di=2;p.slot=null;go('P1');},
+ confirmar:()=>{S.p.conf=true;render();toast('¡Gracias! Su asistencia quedó confirmada.');},
+ cancelAsk:()=>modal({t:'¿Cancelar su cita?',b:`Su cita del ${fmt(S.p.booked)} a las ${S.p.booked.s} se cancelará. La consulta del plan de este mes no se recupera.`,ok:['Sí, cancelar','cancelDo'],okRed:true,no:'No, volver'}),
+ cancelDo:()=>{S.p.cancelled=true;S.p.conf=false;S.hist=[];go('P6');},
+ newBooking:()=>{const p=S.p;p.booked=null;p.second=null;p.mode='nueva';p.slot=null;p.repro=0;p.w=0;p.di=1;S.hist=[];go('P1');},
+ cond:c=>{const p=S.p;if(c==='Ninguna'){p.cond=p.cond.includes('Ninguna')?[]:['Ninguna'];}else{p.cond=p.cond.filter(x=>x!=='Ninguna');p.cond=p.cond.includes(c)?p.cond.filter(x=>x!==c):[...p.cond,c];}render();},
+ hnext:()=>{const p=S.p;if(p.hstep===1&&!document.getElementById('h1n').value.trim()){toast('Escriba sus nombres y apellidos para continuar.');return;}if(p.hstep===2&&!p.cond.length){toast('Elija al menos una opción (o «Ninguna») para continuar.');return;}p.hstep++;p.hst='En progreso';render(true);},
+ hprev:()=>{S.p.hstep--;render(true);},
+ hlater:()=>{S.p.hst=S.p.hstep>1||S.p.hst==='En progreso'?'En progreso':'Pendiente';go('P2');toast('Avance guardado. Puede continuar desde el mismo enlace.');},
+ upload:()=>{S.p.file=true;render();toast('Examen subido.');},
+ consent:()=>{S.p.consent=!S.p.consent;render();},
+ hsend:()=>{S.p.hst='Completa';S.p.hstep=1;S.hist=[];go('P3ok');},
+ waitPac:()=>modal({t:'Lista de espera',b:'Le avisaremos por WhatsApp si se libera un horario.',sel:['wpref','¿Qué horario prefiere?',['Cualquier día por la tarde','Solo sábados','Lo antes posible']],ok:['Anotarme','waitPacDo'],no:'Cancelar'}),
+ waitPacDo:()=>{S.modal=null;render();toast('Listo. Está en la lista de espera; le escribiremos si se libera un horario.');},
+ menor:()=>{S.p.menor=!S.p.menor;render();},
+ // doctora
+ login:k=>{if(k!=='face'){const m=document.getElementById('lmail').value.trim(),pw=document.getElementById('lpass').value;if(!m||!pw){document.getElementById('lerr').hidden=false;return;}}S.d.logged=true;S.hist=[];go('D2');toast(k==='face'?'Ingreso con Face ID.':'Bienvenida, doctora.');},
+ dview:v=>{S.d.view=v;render(true);}, weekDay:i=>{S.d.day=+i;S.d.view='lista';render(true);}, dday:i=>{S.d.day=+i;render(true);},
+ openA:id=>{S.d.sel=id;go('D3');},
+ ficha:n=>{S.d.fichaN=n;S.d.tab='Resumen';go('D4');},
+ tab:t=>{S.d.tab=t;render(true);},
+ pdf:x=>modal({t:x,b:'<div style="height:240px;border:1px dashed #C9D1CC;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#55625E;font-size:14px">[Vista previa del PDF]</div>',raw:true,no:'Cerrar',ok:['Enviar al paciente','sendPdf']}),
+ sendPdf:()=>{S.modal=null;render();toast('El PDF quedó listo para enviarse con el mensaje de agradecimiento.');},
+ addNote:()=>{const v=document.getElementById('note').value.trim();if(!v){toast('Escriba la nota antes de guardarla.');return;}const n=S.d.fichaN;document.getElementById('note').value='';S.d.notes[n]=['10 nov · '+v,...(S.d.notes[n]||[])];render();toast('Nota guardada.');},
+ moveAsk:()=>modal({t:'Mover cita de '+curA().n,b:'Elija el nuevo horario de hoy:',opts:['17:15','17:45'].map(s=>[s,'moveDo',s]),no:'Cancelar'}),
+ moveDo:s=>{const a=curA();a.t=s;S.d.appts.sort((x,y)=>x.t.localeCompare(y.t));S.modal=null;render();toast('Cita movida a las '+s+'. Se avisará al paciente y se actualizará Outlook.');},
+ markA:e=>{const a=curA();a.prev=a.est;a.est=e;render();toast(e==='Atendida'?'Consulta registrada. Se preparó el mensaje de agradecimiento.':'Marcada como «No asistió». La asistente recibirá el aviso.');},
+ undoA:()=>{const a=curA();a.est=a.prev||'Confirmada';render();},
+ readAll:()=>{S.d.avisos.forEach(a=>a.read=true);render();},
+ aviso:i=>{const a=S.d.avisos[+i];a.read=true;if(a.go==='exc'){modal({t:'Solicitud de excepción',b:a.x,ok:['Aprobar','excDo','ok'],no:'Rechazar'});return;}if(a.go==='D2')go('D2');else if(a.go.startsWith('f:')){S.d.fichaN=a.go.slice(2);S.d.tab='Resumen';go('D4');}else{S.d.sel=a.go;go('D3');}},
+ excDo:()=>{S.modal=null;render();toast('Excepción aprobada. La asistente podrá agendar la consulta sin costo.');},
+ logoutDoc:()=>{S.d.logged=false;S.hist=[];go('D1');toast('Sesión cerrada.');},
+ logoutAllDoc:()=>modal({t:'¿Cerrar sesión en todos los dispositivos?',b:'Úselo si perdió su celular o computador. Tendrá que volver a ingresar con correo y contraseña.',ok:['Cerrar sesiones','logoutAllDo'],okRed:true,no:'Cancelar'}),
+ logoutAllDo:()=>{S.modal=null;S.d.logged=false;S.hist=[];go('D1');toast('Se cerró la sesión en todos los dispositivos.');},
+ fsec:i=>{S.d.fsec=+i;render(true);},
+ freq:i=>{const q=S.d.form[S.d.fsec].qs[+i];q[1]=q[1]?0:1;render();},
+ fdel:i=>{const sec=S.d.form[S.d.fsec],q=sec.qs[+i];sec.qs.splice(+i,1);render();toast('Pregunta «'+q[0]+'» quitada. Guarde para aplicar.');},
+ faddAsk:()=>modal({t:'Agregar pregunta',fields:[['fq','Pregunta','']],sel:['ft2','Tipo de respuesta',['Texto corto','Opción múltiple','Sí / No','Número','Archivo']],ok:['Agregar','faddDo'],no:'Cancelar'}),
+ faddDo:()=>{const q=document.getElementById('fq').value.trim();if(!q){toast('Escriba la pregunta.');return;}S.d.form[S.d.fsec].qs.push([q,0]);S.modal=null;render();toast('Pregunta agregada como opcional.');},
+ fsaveAsk:()=>modal({t:'Confirmar cambios',b:'Es un cambio importante: escriba el código de 6 dígitos que enviamos a su correo.',fields:[['fcode','Código de verificación','']],ok:['Guardar','fsaveDo'],no:'Cancelar'}),
+ fsaveDo:()=>{if(!/^\d{6}$/.test(document.getElementById('fcode').value.trim())){toast('El código debe tener 6 dígitos. Pruebe con 123456.');return;}S.modal=null;render();toast('Formulario actualizado. Los pacientes nuevos verán estas preguntas.');},
+ blockDo:()=>{const d=document.getElementById('bd').value,f=document.getElementById('bf').value,h=document.getElementById('bh').value;if(f>=h){toast('La hora final debe ser posterior a la inicial.');return;}S.d.blocks.push(d+' · '+f+' a '+h);render();toast('Horario bloqueado y sincronizado con Outlook.');},
+ unblock:i=>{S.d.blocks.splice(+i,1);render();toast('Bloqueo quitado. Esos horarios vuelven a estar disponibles.');},
+ // asistente
+ alogin:()=>{const m=document.getElementById('am').value.trim(),pw=document.getElementById('ap').value;if(!m||!pw){S.a.lerr=true;render();return;}S.a.lerr=false;S.a.logged=true;S.hist=[];go('A1');toast('Bienvenida, Ana.');},
+ fichaWeb:n=>{S.a.ficha=n;S.a.ftab='Datos';S.a.hedit=false;go('A7');},
+ ftab:t=>{S.a.ftab=t;S.a.hedit=false;render(true);},
+ hedit:()=>{S.a.hedit=!S.a.hedit;render();},
+ hsave:()=>{S.a.hedit=false;render();toast('Historia clínica actualizada. Quedó en el registro de actividad.');},
+ upInbody:()=>{S.a.files.unshift('InBody · 10 nov 2026');render();toast('InBody subido a la historia clínica.');},
+ pdfWeb:f=>modal({t:f,b:'<div style="height:280px;border:1px dashed #C9D1CC;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#55625E;font-size:14px">[Vista previa del PDF]</div>',raw:true,no:'Cerrar'}),
+ mtab:t=>{S.a.mtab=t;if(S.screen!=='A3')go('A3');else render(true);},
+ tpl:i=>{S.a.tpl=+i;render();},
+ tvar:v=>{const t=document.getElementById('ttx');t.value+=' '+v;t.focus();},
+ tsave:()=>{const t=S.a.tpls[S.a.tpl];t[3]=document.getElementById('ttx').value;t[2]=document.getElementById('tch').value;render();toast('Plantilla guardada.');},
+ sendRep:m=>modal({t:'Enviar reporte a '+m,b:'Se enviará por correo el reporte de octubre en PDF, solo con los pacientes que '+m+' derivó.',ok:['Enviar','sendRepDo'],no:'Cancelar'}),
+ sendRepDo:()=>{S.modal=null;render();toast('Reporte enviado al médico derivador.');},
+ aview:v=>{S.a.view=v;S.a.drawer=null;render();},
+ ev:id=>{S.a.drawer={t:'ev',id};render();}, closeDr:()=>{S.a.drawer=null;render();},
+ evConf:id=>{findEv(id).est='Confirmada';render();toast('Cita confirmada. Se actualizó Outlook.');},
+ evCancelAsk:id=>{const e=findEv(id);modal({t:'¿Cancelar la cita de '+e.n+'?',b:'Se avisará a la doctora y al paciente. El horario no se libera solo: podrá ofrecerlo a la lista de espera.',ok:['Sí, cancelar','evCancel',id],okRed:true,no:'No'});},
+ evCancel:id=>{findEv(id).est='Cancelada';S.modal=null;render();toast('Cita cancelada. Se notificó a la doctora y, si es derivado, al médico derivador.');},
+ offer:n=>{const e=findEv('w8');e.est='Ofrecido';e.n=n;S.a.offered=n;S.a.drawer=null;render();toast('Horario de las 17:15 ofrecido a '+n+'. Mensaje listo en WhatsApp.');},
+ waitAsk:()=>modal({t:'Agregar a la lista de espera',fields:[['wn','Nombre del paciente',''],['wx','Preferencia de horario','Tardes']],ok:['Agregar','waitDo'],no:'Cancelar'}),
+ waitDo:()=>{const n=document.getElementById('wn').value.trim();if(!n){toast('Escriba el nombre del paciente.');return;}S.a.wait.push({n,x:document.getElementById('wx').value||'Sin preferencia'});S.modal=null;render();toast(n+' quedó en la lista de espera.');},
+ newApptAsk:()=>modal({t:'Agendar cita',fields:[['nn','Paciente','Jorge Molina'],['nd','Día','Mié 11'],['nt','Hora','17:00']],sel:['nm','Modalidad',['Presencial','Virtual']],ok:['Agendar','newAppt'],no:'Cancelar'}),
+ newAppt:()=>{const n=document.getElementById('nn').value.trim(),d=document.getElementById('nd').value.trim(),t=document.getElementById('nt').value.trim(),m=document.getElementById('nm').value;
+  const i=WEEKS[0].days.findIndex(x=>(x[0]+' '+x[1]).toLowerCase()===d.toLowerCase());
+  if(!n||i<0||!/^\d{2}:\d{2}$/.test(t)){toast('Revise los datos: el día debe ser como «Mié 11» y la hora como «17:00».');return;}
+  if(S.a.week[i]==='fer'){toast('Ese día es feriado; elija otro.');return;}
+  S.a.week[i].push({id:'n'+Date.now(),t,n,est:'Confirmada',hist:'Completa',mod:m});S.a.week[i].sort((x,y)=>x.t.localeCompare(y.t));S.modal=null;render();toast('Cita agendada. Se envió el mensaje de bienvenida y se agregó a Outlook.');},
+ filt:f=>{S.a.filt=f;S.a.drawer=null;render();}, pac:n=>{S.a.drawer={t:'pac',n};render();},
+ copyLink:n=>{toast('Enlace de reserva de '+n+' copiado (vence en 72 h).');},
+ arch:n=>{const p=S.a.pacs.find(x=>x.n===n);p.arch=!p.arch;S.a.drawer=null;render();toast(p.arch?n+' fue archivado. Está en «Archivados».':n+' fue reactivado.');},
+ delAsk:n=>modal({t:'¿Eliminar los datos de '+n+'?',b:'Solo se hace cuando el paciente lo pide. Se borrarán su ficha, historia y archivos. Se pedirá un código de verificación.',ok:['Eliminar','delDo',n],okRed:true,no:'Cancelar'}),
+ delDo:n=>{S.a.pacs=S.a.pacs.filter(x=>x.n!==n);S.a.drawer=null;S.modal=null;render();toast('Datos eliminados. Quedó registrado en el registro de actividad.');},
+ reg:()=>{const v=id=>document.getElementById(id).value.trim();const n=v('rn'),c=v('rc'),w=v('rw'),e=v('re');
+  let err='';if(!n||!c||!w||!e)err='Complete los campos con *.';else if(!/^\d{10}$/.test(c))err='La cédula debe tener 10 dígitos.';else if(!/^\S+@\S+\.\S+$/.test(e))err='Escriba un correo válido.';else if(S.a.pacs.some(p=>p.ci===c))err='Ya existe un paciente con esa cédula.';
+  S.a.err=err;if(err){render();return;}
+  const t=document.getElementById('rt').value,menor=document.getElementById('rm').checked;
+  S.a.pacs.unshift({n:n+(menor?' (menor)':''),ci:c,tipo:t==='Derivado'?'Derivada':'Propio',der:v('rd'),plan:t==='Derivado'?'0 de 2':'Por consulta',hist:'Pendiente',next:'Sin cita',tag:'Nuevo',arch:false});
+  ['rn','rc','rw','re','rd','rm'].forEach(k=>delete S.f[k]);S.a.filt='Activos';S.a.q='';render();toast('Paciente registrado. El enlace de reserva quedó listo para enviar (vence en 72 h).');},
+ msg:i=>{S.a.msg=+i;render();},
+ send:i=>{const m=S.a.msgs[+i];S.a.msg=+i;const was=m.est;m.est='Enviado';render();toast(was==='Falló'?'Reintento exitoso: correo enviado.':'Se abrió WhatsApp Web con el mensaje. Marcado como enviado.');},
+ pkSel:n=>{S.a.pkSel=n;render();},
+ pay:()=>{const n=document.getElementById('pp').value,c=document.getElementById('pc').value,m=document.getElementById('pm').value.trim(),f=document.getElementById('pf').value.trim(),met=document.querySelector('input[name=pmet]:checked').value;
+  const num=parseFloat(m.replace(',','.'));if(!(num>0)){S.a.perr='Escriba un monto mayor a 0.';render();return;}if(!f){S.a.perr='Escriba la fecha del pago.';render();return;}S.a.perr='';
+  let p=S.a.pk.find(x=>x.n===n);const plan=c.startsWith('Plan');
+  if(plan){if(!p){p={n,c:'0 de 2',f:'Sin fechas elegidas',pago:'',est:''};S.a.pk.push(p);}if(p.est==='Por renovar'){p.c='0 de 2';p.f='Sin fechas elegidas';}p.pago=`$${Math.round(num)} · ${met} · ${f.slice(0,5).replace('/11',' nov')}`;p.est='Al día';}
+  S.a.ingresos+=Math.round(num);S.a.pkSel=null;render();toast('Pago de $'+num.toFixed(2).replace('.',',')+' registrado para '+n+'.');},
+ dl:k=>{const a=S.a;toast('Se generó «reporte_'+(a.rep.includes('derivados')?'derivados':'privados')+'_oct2026.'+k+'». En el sistema real se descargaría.');},
+ horAsk:()=>modal({t:'Editar horario',fields:[['hlv','Lunes a viernes',S.a.horario.lv],['hsa','Sábado',S.a.horario.sab]],ok:['Guardar','horDo'],no:'Cancelar'}),
+ horDo:()=>{S.a.horario={lv:document.getElementById('hlv').value,sab:document.getElementById('hsa').value};S.modal=null;render();toast('Horario actualizado. Los pacientes verán los nuevos turnos.');},
+ ferAsk:()=>modal({t:'Agregar feriado o vacaciones',fields:[['fd','Fecha o rango','Lunes 8 feb 2027 (Carnaval)']],sel:['ft','Tipo',['Feriado','Vacaciones']],ok:['Agregar','ferDo'],no:'Cancelar'}),
+ ferDo:()=>{const d=document.getElementById('fd').value.trim();if(!d){toast('Escriba la fecha.');return;}S.a.fer.push([d,document.getElementById('ft').value]);S.modal=null;render();toast('Fecha agregada. Esos horarios ya no se ofrecen.');},
+ delFer:i=>{S.a.fer.splice(+i,1);render();toast('Fecha quitada.');},
+ accAsk:k=>modal({t:k==='quitar'?'Quitar acceso a Ana P.':'Dar acceso a Ana P.',b:'Por seguridad, escriba el código de 6 dígitos que enviamos al correo de la doctora.',fields:[['code','Código de verificación','']],ok:['Confirmar','accDo',k],okRed:k==='quitar',no:'Cancelar'}),
+ accDo:k=>{const c=document.getElementById('code').value.trim();if(!/^\d{6}$/.test(c)){toast('El código debe tener 6 dígitos. Pruebe con 123456.');return;}S.a.asis=k!=='quitar';S.modal=null;render();toast(k==='quitar'?'Acceso quitado. Ana P. ya no puede entrar.':'Acceso restablecido para Ana P.');},
+ logoutAsk:()=>modal({t:'¿Cerrar sesión en todos los dispositivos?',b:'Úselo si se perdió un celular o computador. Todos tendrán que volver a ingresar.',ok:['Cerrar sesiones','logoutDo'],okRed:true,no:'Cancelar'}),
+ logoutDo:()=>{S.modal=null;render();toast('Sesiones cerradas en 3 dispositivos.');},
+ logAsk:()=>modal({t:'Registro de actividad',b:'<div style="display:flex;flex-direction:column;gap:8px;font-size:14px"><div class="kv"><span>10 nov 13:05</span><b>Ana P. registró un pago</b></div><div class="kv"><span>10 nov 11:20</span><b>Sistema envió bienvenida</b></div><div class="kv"><span>9 nov 18:40</span><b>Doctora editó una ficha</b></div><div class="kv"><span>8 nov 02:00</span><b>Respaldo semanal</b></div></div>',raw:true,no:'Cerrar'})
+};
+const IN={dq:v=>{S.d.q=v;render();refocus('dq');},aq:v=>{S.a.q=v;render();refocus('aq');},rep:v=>{S.a.rep=v;render();},med:v=>{S.a.med=v;render();}};
+function refocus(id){const el=document.getElementById(id);if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}}
+
+function modalHTML(){const m=S.modal;if(!m)return '';
+ const fields=(m.fields||[]).map(f=>`<label class="${S.role==='asi'?'fw':'fld'}">${f[1]}<input id="${f[0]}" value="${esc(f[2])}"></label>`).join('');
+ const sel=m.sel?`<label class="${S.role==='asi'?'fw':'fld'}">${m.sel[1]}<select id="${m.sel[0]}">${m.sel[2].map(o=>`<option>${o}</option>`).join('')}</select></label>`:'';
+ const opts=m.opts?`<div class="g2">${m.opts.map(o=>`<button class="b o" ${A(o[1],o[2])}>${o[0]}</button>`).join('')}</div>`:'';
+ const cls=S.role==='asi'?'wb':'b';
+ return `<div id="modal" role="dialog" aria-modal="true" aria-label="${esc(m.t)}"><div class="mbox"><h2>${esc(m.t)}</h2>${m.b?(m.raw?m.b:`<p class="muted" style="font-size:15px">${esc(m.b)}</p>`):''}${fields}${sel}${opts}
+ <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap"><button class="${cls} ${S.role==='asi'?'k':'o'}" style="${S.role==='asi'?'':'width:auto'}" ${A('closeModal')}>${m.no||'Cerrar'}</button>${m.ok?`<button class="${cls} ${m.okRed?'r':''}" style="${S.role==='asi'?'':'width:auto'}" ${A(m.ok[1],m.ok[2])}>${m.ok[0]}</button>`:''}</div></div></div>`;}
+
+function render(top){
+ const scr=SCREENS[S.screen]||SCREENS[LISTS[S.role][0][0]];
+ const st=dev.querySelector('.amain,.wmain');const y=st?st.scrollTop:0;
+ dev.innerHTML=(S.role==='asi'?'':'')+scr()+modalHTML();
+ const nt=dev.querySelector('.amain,.wmain');if(nt&&!top)nt.scrollTop=y;
+ const list=LISTS[S.role],cur=S.screen==='P3ok'?'P3':S.screen;
+ document.getElementById('slist').innerHTML=list.map(([k,n])=>`<button class="${k===cur?'on':''}" data-jump="${k}"><span class="c">${k}</span>${n}</button>`).join('');
+ document.getElementById('steps').innerHTML=STEPS[S.role].map(s=>`<li>${s}</li>`).join('');
+ 
+}
+function fit(){
+ const phone=S.role!=='asi';bezel.className=phone?'phone':'web';
+ const W=phone?410:1280,H=phone?864:800;
+ const aw=stage.clientWidth,ah=Math.max(window.innerHeight-stage.getBoundingClientRect().top-16,420);
+ let s=phone?Math.min(1,aw/W,ah/H):Math.min(1,aw/W);
+ bezel.style.transform=`scale(${s})`;scaler.style.width=W*s+'px';scaler.style.height=H*s+'px';
+}
+dev.addEventListener('click',e=>{
+ const el=e.target.closest('[data-act]');
+ if(el&&!el.disabled){e.preventDefault();const f=ACT[el.dataset.act];if(f)f(el.dataset.arg,el);return;}
+ if(!e.target.closest('input,select,textarea,label,[disabled]')){dev.classList.remove('flash');void dev.offsetWidth;dev.classList.add('flash');setTimeout(()=>dev.classList.remove('flash'),700);}
+});
+const keep=e=>{const t=e.target;if(t.id&&!t.dataset.in&&!('nokeep' in t.dataset)&&!t.closest('#modal'))S.f[t.id]=t.type==='checkbox'?t.checked:t.value;};
+dev.addEventListener('input',keep);dev.addEventListener('change',keep);
+dev.addEventListener('input',e=>{const k=e.target.dataset.in;if(k&&IN[k]&&e.target.tagName==='INPUT')IN[k](e.target.value);});
+dev.addEventListener('change',e=>{const k=e.target.dataset.in;if(k&&IN[k]&&e.target.tagName==='SELECT')IN[k](e.target.value);});
+document.getElementById('slist').addEventListener('click',e=>{const b=e.target.closest('[data-jump]');if(!b)return;const k=b.dataset.jump;
+ if(['P2','P4','P7','P8'].includes(k))ensureBooked();if(k==='P1'&&S.p.mode!=='nueva')S.p.mode='nueva';if(k==='P3'&&S.p.hst==='Completa'){S.screen='P3ok';S.modal=null;render(true);return;}
+ S.hist=[];S.screen=k;S.modal=null;S.a.drawer=null;render(true);});
+document.getElementById('roles').addEventListener('click',e=>{const b=e.target.closest('[data-role]');if(!b)return;S.role=b.dataset.role;S.hist=[];S.modal=null;S.a.drawer=null;
+ S.screen=S.role==='pac'?'P0':S.role==='doc'?(S.d.logged?'D2':'D1'):(S.a.logged?'A1':'A0');render(true);fit();});
+document.getElementById('resetBtn').addEventListener('click',()=>{const r=S.role;S=init();S.role=r;S.screen=LISTS[r][0][0];render(true);fit();toast('Prototipo reiniciado.');});
+const hb=document.getElementById('hotBtn');hb.addEventListener('click',()=>{const on=dev.classList.toggle('showhot');hb.classList.toggle('on',on);hb.setAttribute('aria-pressed',on);hb.textContent=on?'Ocultar zonas clicables':'Mostrar zonas clicables';});
+window.addEventListener('resize',fit);
+render(true);fit();
+})();
+</script>
+
+</body>
+</html>

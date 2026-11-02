@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NutriAgenda · Prototipo</title>
+<style>
+:root{--bg:#F6F7F4;--fg:#1C2B27;--muted:#55625E;--accent:#1E6B57;--card:#fff;--line:#E2E6E1}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:48px 20px;display:flex;flex-direction:column;gap:24px}
+h1{margin:0;font-size:34px}
+p{margin:0;color:var(--muted);line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+a.card{display:flex;flex-direction:column;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;text-decoration:none;color:var(--fg)}
+a.card:hover{border-color:var(--accent)}
+a.card b{font-size:18px;color:var(--accent)}
+small{color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <div><h1>NutriAgenda</h1><p>Prototipo navegable del sistema para el consultorio de nutrición. Equipo T6 – Los Guayabyte, Ingeniería de Software I, ESPOL. Todos los datos son ficticios.</p></div>
+  <div class="grid">
+    <a class="card" href="04-prototipo/paciente.html"><b>Paciente</b><span>Enlace web en el celular: reservar, llenar la historia clínica y gestionar la cita.</span></a>
+    <a class="card" href="04-prototipo/doctora.html"><b>Doctora</b><span>Aplicación del iPhone: agenda, fichas, avisos y formulario.</span></a>
+    <a class="card" href="04-prototipo/asistente.html"><b>Asistente</b><span>Panel web: agenda, pacientes, mensajes, pagos y reportes.</span></a>
+  </div>
+  <small>Cada prototipo es independiente. El botón «Reiniciar» de cada uno lo deja como al inicio.</small>
+</main>
+</body>
+</html>
