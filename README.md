@@ -18,7 +18,7 @@ NutriAgenda es un sistema para el consultorio de nutrición de la Dra. Sara Ord�
 El prototipo es navegable y usa solo datos ficticios. Cada usuario tiene su propio archivo:
 
 - [Paciente (enlace web)](04-prototipo/paciente.html)
-- [Doctora (aplicación del iPhone)](04-prototipo/doctora.html)
+- [Doctora (panel web: computador y celular)](04-prototipo/doctora.html)
 - [Asistente (panel web)](04-prototipo/asistente.html)
 
 Para verlo, abra la página del proyecto en GitHub Pages o descargue los archivos y ábralos con doble clic en cualquier navegador. Las capturas de las 29 pantallas están en `04-prototipo/capturas` y los flujos de ventanas, en `04-prototipo/flujos`.
