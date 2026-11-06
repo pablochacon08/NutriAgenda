@@ -74,4 +74,4 @@ Estos puntos no se alcanzaron a tratar en la reunión y se le enviaron por Whats
 - permiso para entrevistar a la asistente y encuestar a pacientes;
 - documentos actuales del consultorio.
 
-La propuesta adoptada para cada uno está en la sección 9 del SRS.
+La propuesta adoptada para cada uno está en la sección 8 del SRS.
