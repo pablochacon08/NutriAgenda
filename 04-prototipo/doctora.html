@@ -58,6 +58,11 @@ body{background:var(--bg);color:var(--fg);font-family:var(--app);font-size:15px}
 @media (prefers-reduced-motion:no-preference){#device [data-act]{transition:box-shadow .15s}}
 /* ===== app (celular) ===== */
 .app{width:390px;height:844px;display:flex;flex-direction:column;background:#F6F7F4;overflow:hidden}
+#device.bigtxt .app .amain,#device.bigtxt .app .ahdr,#device.bigtxt .app .afoot{zoom:1.16}
+.aa{align-self:flex-end;white-space:nowrap;border:1.5px solid rgba(255,255,255,.75);background:transparent;color:#fff;font:700 14px var(--app);border-radius:999px;padding:0 14px;min-height:36px;cursor:pointer}
+.msel{font:500 13.5px var(--app);padding:5px 8px;border:1px solid #C9D1CC;border-radius:7px;background:#fff;color:#1C2B27;max-width:190px}
+.tog{border:0;border-radius:999px;font:700 12.5px var(--app);padding:0 10px;min-height:28px;cursor:pointer}.tog.on{background:#E3F0EA;color:#1E6B57}.tog.off{background:#EEF0EC;color:#55625E}
+.wbanner{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#FCEFD9;border:1px solid #F0D3A2;color:#6B3A00;border-radius:12px;padding:10px 14px;font-size:14.5px}
 .ahdr{background:#fff;border-bottom:1px solid #E2E6E1;padding:18px 20px 14px;display:flex;flex-direction:column;gap:8px}
 .ahdr.g{background:#1E6B57;color:#fff;border:0;padding:30px 22px 20px}
 .amain{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px}
@@ -235,8 +240,8 @@ const fmtS=b=>b?`${b.d[0].toLowerCase()} ${b.d[1]} · ${b.s}`:'';
 
 function init(){return{
  role:'pac',screen:'P0',hist:[],modal:null,f:{},
- p:{mode:'nueva',mod:'Presencial',w:0,di:1,slot:null,booked:null,second:null,hstep:1,hst:'Pendiente',conf:false,repro:0,consent:false,cond:['Hipertensión'],file:false,menor:false},
- d:{logged:false,blocks:[],fsec:0,day:1,
+ p:{mode:'nueva',mod:'Presencial',w:0,di:1,slot:null,booked:null,second:null,hstep:1,hst:'Pendiente',conf:false,repro:0,consent:false,cond:['Hipertensión'],file:false,menor:false,big:false,msgOk:false,filt:{}},
+ d:{logged:false,off:false,blocks:[],fsec:0,day:1,
   form:[{s:'Datos personales y seguro',qs:[['Nombres y apellidos',1],['Cédula',1],['Fecha de nacimiento',1],['¿Tiene seguro médico? ¿Cuál?',0],['Ocupación',0],['Médico que la deriva',0]]},{s:'Antecedentes y hábitos',qs:[['Condiciones de salud',1],['Medicamentos actuales',1],['Alergias o intolerancias',0],['Actividad física semanal',1],['Horas de sueño',0],['Consumo de alcohol o tabaco',0]]},{s:'Alimentación habitual',qs:[['Comidas al día',1],['Vasos de agua al día',1],['Alimentos que no le gustan',0],['Objetivo de la consulta',1]]},{s:'Exámenes y consentimiento',qs:[['Exámenes de laboratorio (archivo)',0],['Consentimiento de datos',1]]}],
   view:'lista',sel:'a1',tab:'Resumen',q:'',fichaN:'Andrea Salazar',
   appts:[
@@ -247,14 +252,14 @@ function init(){return{
    {id:'a5',t:'17:15',cancel:true}],
   notes:{'Andrea Salazar':['27 oct · Reducir azúcares añadidos. Revisar adherencia al plan y nueva medición InBody.','6 oct · Primera consulta. Objetivo: bajar 4 kg en 3 meses.']},
   avisos:[
+   {t:'Outlook no se sincronizó',x:'La sincronización de las 15:10 falló. El sistema reintenta solo cada minuto; también puede reintentar ahora.',w:'Hace 5 min',c:'#8A4B00',go:'sync',read:false},
    {t:'Solicitud de excepción',x:'Paula Vera pide recuperar su consulta perdida de octubre (estuvo enferma). Usted decide.',w:'Hace 10 min',c:'#8A4B00',go:'exc',read:false},
    {t:'Cita cancelada',x:'Carlos Ruiz canceló su cita de hoy a las 17:15. Hay 2 pacientes en lista de espera.',w:'Hace 20 min',c:'#B3261E',go:'D2',read:false},
    {t:'Nueva reserva',x:'María Torres reservó hoy a las 15:30 (presencial).',w:'Hace 1 h',c:'#1E6B57',go:'a3',read:false},
-   {t:'Historia clínica completa',x:'Jorge Molina terminó su formulario y subió 1 examen.',w:'Hace 3 h',c:'#1E6B57',go:'f:Jorge Molina',read:false},
-   {t:'Plan por renovar',x:'Andrea Salazar usará su última consulta del plan el 24 nov.',w:'Ayer',c:'#8A968F',go:'f:Andrea Salazar',read:true},
+      {t:'Plan por renovar',x:'Andrea Salazar usará su última consulta del plan el 24 nov.',w:'Ayer',c:'#8A968F',go:'f:Andrea Salazar',read:true},
    {t:'Paciente sin confirmar',x:'Luis Paredes no ha confirmado su próxima cita. La asistente fue notificada.',w:'Ayer',c:'#8A968F',go:'a2',read:true}]},
  a:{logged:false,mtab:'Hoy',tpl:0,ftab:'Datos',ficha:'Andrea Salazar',hedit:false,files:['InBody · 27 oct 2026','InBody · 13 oct 2026','Hemograma · 20 oct 2026'],
-  tpls:[['Bienvenida e historia clínica','Al reservar','Correo','Bienvenida, {nombre}. Su cita quedó reservada para el {fecha} a las {hora}. Por favor, llene su historia clínica antes de la consulta: {enlace}'],['Confirmación de asistencia','3 días antes','WhatsApp','Buenas tardes, {nombre} 🗓️ Su cita de nutrición es el {fecha} a las {hora}. ¿Nos confirma su asistencia? {enlace}'],['Código QR de acceso','1 día antes','WhatsApp','Buenas tardes, {nombre}. Le recordamos su cita de mañana a las {hora}. Adjuntamos su código QR para ingresar al edificio.'],['Recordatorio','24 horas antes','Correo','Hola, {nombre}. Le recordamos su cita de mañana, {fecha}, a las {hora}.'],['Recordatorio','3 horas antes','Correo','Hola, {nombre}. Le esperamos hoy a las {hora}. Hay 15 minutos de tolerancia.'],['Agradecimiento + InBody','Después de la consulta','Correo','Gracias por su visita, {nombre} ✅ Adjuntamos el resultado de su InBody. Su próxima cita es el {proxima}.'],['Recordatorio de historia clínica','1 vez, si no la llenó','WhatsApp','Hola, {nombre}. Aún falta su historia clínica; puede llenarla aquí: {enlace}']],
+  tpls:[['Bienvenida e historia clínica','Al reservar','Correo','Bienvenida, {nombre}. Su cita quedó reservada para el {fecha} a las {hora}. Por favor, llene su historia clínica antes de la consulta: {enlace}'],['Confirmación de asistencia','3 días antes','WhatsApp','Buenas tardes, {nombre} 🗓️ Su cita de nutrición es el {fecha} a las {hora}. ¿Nos confirma su asistencia? {enlace}'],['Código QR de acceso','1 día antes','WhatsApp','Buenas tardes, {nombre}. Le recordamos su cita de mañana a las {hora}. Adjuntamos su código QR para ingresar al edificio.'],['Recordatorio','24 horas antes','Correo','Hola, {nombre}. Le recordamos su cita de mañana, {fecha}, a las {hora}.'],['Recordatorio','3 horas antes','Correo','Hola, {nombre}. Le esperamos hoy a las {hora}. Hay 15 minutos de tolerancia.'],['Agradecimiento + InBody','Después de la consulta','Correo','Gracias por su visita, {nombre} ✅ Adjuntamos el resultado de su InBody. Su próxima cita es el {proxima}.'],['Recordatorio de historia clínica','2 veces, si no la llenó','WhatsApp','Hola, {nombre}. Aún falta su historia clínica; puede llenarla aquí: {enlace}'],['Preparación para el análisis','2 días antes (consultas de control)','WhatsApp','Hola, {nombre}. Para su análisis de composición corporal del {fecha}: venga con 3 horas de ayuno, sin hacer ejercicio ese día y con ropa ligera.'],['Felicitación de cumpleaños','El día del cumpleaños','WhatsApp','¡Feliz cumpleaños, {nombre}! 🎉 Por su día tiene {descuento} de descuento en su próxima consulta de este mes.'],['Mensaje motivacional','Cada 2 semanas','WhatsApp','Hola, {nombre} 💪 Los pequeños cambios de cada día suman. ¡Siga así! Cualquier duda, aquí estamos.'],['Invitar a volver','Tras 3 meses sin cita','Correo','Hola, {nombre}. Hace un tiempo que no la vemos en consulta. Si desea retomar su plan, puede reservar aquí: {enlace}']],
   sec:'A1',view:'Semana',drawer:null,filt:'Activos',q:'',msg:0,err:'',perr:'',rep:'Pacientes derivados',med:'Dr. [Derivador A]',offered:null,ingresos:490,
   week:[
    [{id:'w1',t:'14:00',n:'Paula Vera',est:'Confirmada',hist:'Completa',mod:'Presencial'},{id:'w2',t:'15:30',n:'Diego Cruz',est:'Confirmada',hist:'Completa',mod:'Presencial'},{id:'w3',t:'17:00',n:'Rosa Mejía',est:'Confirmada',hist:'Pendiente',mod:'Presencial'}],
@@ -277,27 +282,30 @@ function init(){return{
    {tipo:'Confirmación de asistencia',cita:'jue 12 · 15:30',n:'Marco Vélez',canal:'WhatsApp',est:'Listo para enviar'},
    {tipo:'Recordatorio 3 h antes',cita:'hoy · 17:00',n:'Rosa Mejía',canal:'Correo',est:'Enviado'},
    {tipo:'Agradecimiento + InBody',cita:'hoy · 14:00',n:'Andrea Salazar',canal:'Correo',est:'Falló'},
-   {tipo:'Bienvenida e historia clínica',cita:'mar 10 · 15:30',n:'María Torres',canal:'Correo',est:'Enviado'}],
+   {tipo:'Bienvenida e historia clínica',cita:'mar 10 · 15:30',n:'María Torres',canal:'Correo',est:'Enviado'},
+   {tipo:'Felicitación de cumpleaños',cita:'',sub:'Cumpleaños hoy · 10 % de descuento',n:'Elena Ríos',canal:'WhatsApp',est:'Listo para enviar'},
+   {tipo:'Invitar a volver',cita:'',sub:'Sin cita desde junio',n:'Gabriela Sánchez',canal:'Correo',est:'Enviado'}],
   pk:[
    {n:'Andrea Salazar',c:'1 de 2',f:'10 y 24 nov',pago:'$70 · transferencia · 3 nov',est:'Al día'},
    {n:'María Torres',c:'0 de 2',f:'10 nov · falta la 2.ª',pago:'—',est:'Por pagar'},
    {n:'Tomás Reyes',c:'2 de 2',f:'3 y 17 nov',pago:'$70 · efectivo · 3 nov',est:'Por renovar'},
    {n:'Paula Vera',c:'1 de 2',f:'9 nov · 2.ª reprogramada (1 vez)',pago:'$70 · transferencia · 2 nov',est:'Al día'}],
   fer:[['Viernes 13 nov 2026','Feriado'],['24 dic 2026 a 2 ene 2027','Vacaciones']],
-  horario:{lv:'14:00 a 19:00',sab:'08:00 a 12:00'},
+  horario:{lv:'14:00 a 19:00',sab:'08:00 a 12:00'},sync:'fail',outName:'Solo iniciales',tool:'Zoom',inact:'15 minutos',maxs:'1 día',
+  auto:{cum:['Felicitación de cumpleaños','Descuento',true,'10 %'],mot:['Mensaje motivacional','Frecuencia',true,'Cada 2 semanas'],vol:['Invitar a volver','Después de',true,'3 meses sin cita']},
   asis:true}
 };}
 let S=init();S.role='doc';S.screen='D1';
 
 const dev=document.getElementById('device'),bezel=document.getElementById('bezel'),scaler=document.getElementById('scaler'),stage=document.getElementById('stage');
 const LISTS={
- pac:[['P0','Bienvenida y políticas'],['P1','Reservar cita'],['P2','Cita reservada'],['P3','Historia clínica'],['P4','Mi cita'],['P7','Mi código QR'],['P8','Mensajes que recibe'],['P6','Cita cancelada'],['P5','Enlace vencido']],
- doc:[['D1','Inicio de sesión'],['D2','Agenda'],['D3','Detalle de cita'],['D4','Ficha del paciente'],['D6','Pacientes'],['D5','Avisos'],['D7','Más opciones'],['D8','Editar formulario'],['D9','Bloquear horario']],
+ pac:[['P0','Bienvenida y políticas'],['P9','Preguntas antes de reservar'],['P1','Reservar cita'],['P2','Cita reservada'],['P3','Historia clínica'],['P4','Mi cita'],['P7','Mi código QR'],['P8','Mensajes que recibe'],['P6','Cita cancelada'],['P5','Enlace vencido']],
+ doc:[['D1','Inicio de sesión'],['D2','Agenda'],['D3','Detalle de cita'],['D4','Ficha del paciente'],['D6','Pacientes'],['D5','Avisos'],['D7','Más opciones'],['D8','Editar formulario'],['D9','Bloquear horario'],['D10','Bloqueo por inactividad']],
  asi:[['A0','Inicio de sesión'],['A1','Agenda y lista de espera'],['A2','Pacientes'],['A7','Ficha completa'],['A3','Mensajes e historial'],['A8','Plantillas de mensajes'],['A4','Paquetes y pagos'],['A5','Reportes'],['A6','Configuración']]};
 const STEPS={
- pac:['Lea la bienvenida y toque «Reservar mi cita».','Elija modalidad, día y hora, y toque Reservar.','Toque «Llenar mi historia clínica» y avance los 4 pasos; acepte el consentimiento y envíe.','Entre a «Ver o cambiar mi cita» y confirme su asistencia.','Elija la fecha de su 2.ª consulta del plan.','Vea su código QR y los mensajes que recibirá.','Pruebe Reprogramar (solo se permite 1 vez) o Cancelar.'],
- doc:['Ingrese con su correo o con Face ID.','Toque la cita de las 14:00 para ver el detalle.','Abra la ficha y recorra las pestañas; agregue una nota.','Vuelva y marque la cita como atendida.','Revise Avisos: apruebe o rechace la solicitud de excepción.','En «Más», edite una pregunta del formulario o bloquee un horario.'],
- asi:['Ingrese con su correo y contraseña.','En Agenda, toque una cita y confírmela, o cancele otra.','Ofrezca el horario de las 17:15 a alguien de la lista de espera.','En Pacientes, registre un paciente nuevo (pruebe dejar un campo vacío).','En Mensajes, envíe los WhatsApp listos y reintente el correo fallido.','Abra la ficha completa de un paciente, edite su historia y suba un InBody.','Revise el historial y edite una plantilla de mensaje.','Registre el pago de María Torres y envíe un reporte al médico derivador.']};
+ pac:['Pruebe «Aa Letra grande» arriba a la derecha, o «Prefiero escribir a la asistente».','Toque «Reservar mi cita» y responda las 3 preguntas cortas.','Elija modalidad, día y hora, acepte los avisos por WhatsApp y correo, y toque Reservar.','Toque «Llenar mi historia clínica» y avance los 4 pasos; acepte el consentimiento y envíe.','Entre a «Ver o cambiar mi cita» y confirme su asistencia.','Elija la fecha de su 2.ª consulta del plan.','Vea su código QR y los mensajes que recibirá.','Pruebe Reprogramar (solo se permite 1 vez) o Cancelar.'],
+ doc:['Ingrese con su correo o con Face ID.','Toque la cita de las 14:00 para ver el detalle.','Abra la ficha y recorra las pestañas; agregue una nota.','Vuelva y marque la cita como atendida.','Revise Avisos: apruebe o rechace la solicitud de excepción.','En «Más», edite una pregunta del formulario o bloquee un horario.','En Avisos, abra «Outlook no se sincronizó» y reintente.','En «Más», vea el bloqueo por inactividad (15 min).','En «Más», pruebe el modo sin internet.'],
+ asi:['Ingrese con su correo y contraseña.','En Agenda, toque una cita y confírmela, o cancele otra.','Ofrezca el horario de las 17:15 a alguien de la lista de espera.','En Pacientes, registre un paciente nuevo (pruebe dejar un campo vacío).','En Mensajes, envíe los WhatsApp listos y reintente el correo fallido.','Abra la ficha completa de un paciente, edite su historia y suba un InBody.','Revise el historial y edite una plantilla de mensaje.','Registre el pago de María Torres y envíe un reporte al médico derivador.','En Agenda, reintente la sincronización con Outlook; abra una cita virtual para ver el enlace.','En Configuración, revise Outlook, la sesión y los mensajes automáticos (cumpleaños, motivacional, invitar a volver).']};
 
 function go(sc,keep){ if(S.screen!==sc){S.hist.push(S.screen);} S.screen=sc; S.modal=null; if(!keep) S.a.drawer=null; render(true); }
 let toastT;
@@ -306,11 +314,13 @@ function modal(o){S.modal=o;render();}
 
 /* ============ PACIENTE ============ */
 function ensureBooked(){const p=S.p;if(!p.booked){p.booked={d:WEEKS[0].days[1],s:'15:30',mod:'Presencial'};}}
-function P0(){return `<div class="app"><div class="ahdr g"><span class="eyebrow" style="opacity:.9">NutriAgenda · Consultorio de Nutrición</span><h1 class="t">Bienvenida, María</h1><p style="margin:0;font-size:16px;line-height:1.4">La Dra. [Nombre] la atenderá en el consultorio [N.º]. Aquí puede reservar su consulta en pocos pasos.</p></div>
+function waA(){return `<button class="back" style="font-size:14.5px;align-self:center" ${A('toast','Se abriría WhatsApp con el número de la asistente.')}>Prefiero escribir a la asistente por WhatsApp</button>`;}
+function aa(){return `<button class="aa" ${A('bigTxt')} aria-pressed="${S.p.big}">Aa ${S.p.big?'Letra normal':'Letra grande'}</button>`;}
+function P0(){return `<div class="app"><div class="ahdr g"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="eyebrow" style="opacity:.9">NutriAgenda · Consultorio de Nutrición</span>${aa()}</div><h1 class="t">Bienvenida, María</h1><p style="margin:0;font-size:16px;line-height:1.4">La Dra. [Nombre] la atenderá en el consultorio [N.º]. Aquí puede reservar su consulta en pocos pasos.</p></div>
  <div class="amain">
- <div class="card"><h2 class="s">Así funciona</h2><p class="muted" style="font-size:15px">1. Elija el día y la hora de su consulta.<br>2. Llene su historia clínica (unos 10 minutos).<br>3. Confirme su asistencia cuando le escribamos.</p></div>
- <div class="card"><h2 class="s">Políticas del programa</h2><p class="muted" style="font-size:15px;line-height:1.55">• La consulta dura de 30 a 45 minutos.<br>• El plan mensual incluye 2 consultas, cada 15 días. Las que no se usen en el mes se pierden.<br>• Puede reprogramar una vez, con anticipación.<br>• Si necesita cancelar, hágalo al menos 1 día antes.<br>• Hay 15 minutos de tolerancia; después, la cita se reprograma.<br>• Para entrar al edificio necesitará el código QR que le enviaremos 1 día antes.</p></div>
- </div><div class="afoot"><button class="b" ${A('go','P1')}>Reservar mi cita</button><span class="muted" style="text-align:center;font-size:13px">Se abre en su navegador, sin instalar nada ni crear cuenta.</span></div></div>`;}
+ <div class="card"><h2 class="s">Así funciona</h2><p class="muted" style="font-size:15px">1. Responda 3 preguntas cortas y elija el día y la hora.<br>2. Llene su historia clínica (unos 10 minutos).<br>3. Confirme su asistencia cuando le escribamos.</p></div>
+ <div class="card"><h2 class="s">Políticas del programa</h2><p class="muted" style="font-size:15px;line-height:1.55">• La consulta dura de 30 a 45 minutos.<br>• El plan mensual incluye 2 consultas en 30 días, una cada 15 días aproximadamente. Las que no se usen en ese plazo se consideran tomadas.<br>• Puede reprogramar una vez, con anticipación.<br>• Si necesita cancelar, hágalo al menos 1 día antes. Si cancela con menos tiempo o no asiste, la consulta se considera tomada.<br>• Hay 15 minutos de tolerancia; después, la cita se reprograma.<br>• Para entrar al edificio necesitará el código QR que le enviaremos 1 día antes.</p></div>
+ </div><div class="afoot"><button class="b" ${A('go','P9')}>Reservar mi cita</button>${waA()}<span class="muted" style="text-align:center;font-size:13px">Se abre en su navegador, sin instalar nada ni crear cuenta.</span></div></div>`;}
 function qr(){let h='';for(let y=0;y<21;y++)for(let x=0;x<21;x++){const f=(x<7&&y<7)||(x>13&&y<7)||(x<7&&y>13);const edge=f&&((x%14===0||x%14===6||y%14===0||y%14===6)||((x%14>=2&&x%14<=4)&&(y%14>=2&&y%14<=4)));const on=f?edge:((x*7+y*13+x*y)%3===0);h+=`<i style="background:${on?'#1C2B27':'#fff'}"></i>`;}return `<div aria-label="Código QR de ejemplo" role="img" style="display:grid;grid-template-columns:repeat(21,1fr);width:210px;height:210px;padding:12px;background:#fff;border-radius:12px;border:1px solid #E2E6E1">${h}</div>`;}
 function P7(){ensureBooked();const b=S.p.booked;return `<div class="app"><div class="ahdr"><button class="back" ${A('back')}>‹ Volver</button><h1 class="t">Mi código QR</h1></div>
  <div class="amain" style="align-items:center;text-align:center">${qr()}
@@ -324,10 +334,23 @@ function P8(){ensureBooked();const b=S.p.booked,f=fmt(b),h=b.s;
  ${msg('Al reservar','Correo',`Bienvenida, María. Su cita quedó reservada para el <b>${f} a las ${h}</b>. Por favor, llene su historia clínica antes de la consulta: [enlace]`)}
  ${msg('3 días antes','WhatsApp',`Buenas tardes, María 🗓️ Su cita de nutrición es el <b>${f} a las ${h}</b>. ¿Nos confirma su asistencia?`,`<button class="b sm o" style="margin-top:8px;width:100%" ${A('go','P4')}>Confirmar asistencia</button>`)}
  ${msg('1 día antes','WhatsApp','Le recordamos su cita de mañana a las '+h+'. Adjuntamos su código QR para ingresar al edificio.',`<button class="b sm o" style="margin-top:8px;width:100%" ${A('go','P7')}>Ver código QR</button>`)}
+ ${msg('2 días antes (consultas de control)','WhatsApp','Hola, María. Para su análisis de composición corporal: venga con 3 horas de ayuno, sin hacer ejercicio ese día y con ropa ligera. [Indicaciones por confirmar con la doctora]')}
  ${msg('24 horas antes','Correo','Hola, María. Le recordamos su cita de mañana a las '+h+'.')}
  ${msg('3 horas antes','Correo','Le esperamos hoy a las '+h+'. Hay 15 minutos de tolerancia.')}
  ${msg('Después de la consulta','Correo','Gracias por su visita, María ✅ Adjuntamos el resultado de su InBody.',`<div style="margin-top:8px;display:flex;gap:8px;align-items:center;background:#F6F7F4;border-radius:8px;padding:8px;font-size:13px"><b style="color:#A3221B">PDF</b> InBody_${b.d[1]}nov2026.pdf</div>`)}
  <p class="muted" style="text-align:center;font-size:12.5px">No se envían mensajes de noche ni en fin de semana.</p></div></div>`;}
+function P9(){const f=S.p.filt;
+ const q=(k,t,ops)=>`<section style="display:flex;flex-direction:column;gap:10px"><h2 class="s">${t}</h2><div class="${ops.length>2?'g2':'g2'}">${ops.map(o=>`<button class="opt ${f[k]===o?'on':''}" ${A('filt',k+'|'+o)}>${o}</button>`).join('')}</div></section>`;
+ const ok=f.pri&&f.der&&f.mot;
+ return `<div class="app"><div class="ahdr g"><div style="display:flex;justify-content:space-between;align-items:center"><button class="back" style="color:#fff" ${A('go','P0')}>‹ Volver</button>${aa()}</div>
+ <h1 class="t">Antes de reservar</h1><p style="margin:0;font-size:16px;line-height:1.4">3 preguntas cortas para preparar su consulta. Toma menos de 1 minuto.</p></div>
+ <div class="amain">
+ ${q('pri','1. ¿Es su primera consulta con la doctora?',['Sí, es la primera','No, ya vine antes'])}
+ ${q('der','2. ¿Le envía otro médico?',['Sí, me deriva un médico','No, vengo por mi cuenta'])}
+ ${f.der==='Sí, me deriva un médico'?`<label class="fld">Nombre del médico (opcional)<input id="fmed" value="${esc(V('fmed',''))}" placeholder="Ejemplo: Dr. Pérez"></label>`:''}
+ ${q('mot','3. ¿Cuál es el motivo principal?',['Bajar de peso','Control de una enfermedad','Rendimiento deportivo','Otro motivo'])}
+ <p class="muted" style="font-size:13px">[Preguntas finales por definir con la doctora.]</p>
+ </div><div class="afoot"><button class="b" ${ok?A('go','P1'):'disabled'}>${ok?'Continuar':'Responda las 3 preguntas'}</button></div></div>`;}
 function P1(){
  const p=S.p,wk=WEEKS[p.w],d=wk.days[p.di];
  const title=p.mode==='repro'?'Reprogramar su cita':p.mode==='segunda'?'Elija su 2.ª consulta':'Hola, María';
@@ -336,10 +359,10 @@ function P1(){
  const days=wk.days.map((x,i)=>{const dis=x[2]==='fer'||x[1]<minDay;return `<button class="opt dk day ${i===p.di&&!dis?'on':''}" ${dis?'disabled':A('day',i)}>${x[0]}<b>${x[1]}</b></button>`}).join('');
  const dDis=d[2]==='fer'||d[1]<minDay;
  const slots=dDis?'<p class="muted">Elija un día disponible.</p>':`<div class="g3">${slotsFor(d).map(s=>{const tk=taken(d[1],s);return `<button class="opt x ${p.slot===s&&!tk?'on':''}" ${tk?'disabled aria-label="'+s+' ocupado"':A('slot',s)}>${s}</button>`}).join('')}</div>`;
- const can=p.slot&&!dDis;
- const lbl=can?`${p.mode==='repro'?'Cambiar a':p.mode==='segunda'?'Elegir':'Reservar'} ${FULL[d[0]]} ${d[1]} · ${p.slot}`:'Elija una hora';
+ const can=p.slot&&!dDis&&(p.mode!=='nueva'||p.msgOk);
+ const lbl=p.slot&&!dDis&&!can?'Acepte los avisos para reservar':can?`${p.mode==='repro'?'Cambiar a':p.mode==='segunda'?'Elegir':'Reservar'} ${FULL[d[0]]} ${d[1]} · ${p.slot}`:'Elija una hora';
  return `<div class="app">
- <div class="ahdr g"><button class="back" style="color:#fff" ${A(p.mode==='nueva'?'go':'back',p.mode==='nueva'?'P0':undefined)}>‹ Volver</button>
+ <div class="ahdr g"><div style="display:flex;justify-content:space-between;align-items:center"><button class="back" style="color:#fff" ${A(p.mode==='nueva'?'go':'back',p.mode==='nueva'?'P9':undefined)}>‹ Volver</button>${aa()}</div>
   <h1 class="t">${title}</h1><p style="margin:0;font-size:16px;line-height:1.4">${sub}</p></div>
  <div class="amain">
   <section style="display:flex;flex-direction:column;gap:10px"><h2 class="s">1. Modalidad</h2>
@@ -350,6 +373,7 @@ function P1(){
    <div class="g6">${days}</div>
    ${p.w===0?'<p class="muted" style="font-size:13px">Lunes 9 ya pasó. Viernes 13: feriado, sin atención.</p>':''}</section>
   <section style="display:flex;flex-direction:column;gap:10px"><h2 class="s">3. Hora disponible</h2>${slots}${p.mode==='nueva'?`<button class="back" style="font-size:14px" ${A('waitPac')}>¿No encuentra un horario? Anótese en la lista de espera</button>`:''}</section>
+  ${p.mode==='nueva'?`<section style="display:flex;flex-direction:column;gap:8px"><h2 class="s">4. Avisos de su cita</h2><button class="check" ${A('msgOk')} aria-pressed="${p.msgOk}"><span class="box2 ${p.msgOk?'on':''}">${p.msgOk?ICON.tick:''}</span>Acepto recibir por WhatsApp y correo los recordatorios, la confirmación y el código QR de mi cita.</button><span class="muted" style="font-size:13px">Sin esto no podemos avisarle de su cita. Puede pedir que dejemos de escribirle cuando quiera.</span></section>`:''}
   ${p.mode==='nueva'?'<div class="card" style="font-size:15px;line-height:1.4">Plan mensual: <b>le quedan 2 de 2 consultas</b> en noviembre. Después de reservar podrá elegir su 2.ª consulta.</div>':''}
  </div>
  <div class="afoot"><button class="b" ${can?A('reservar'):'disabled'}>${lbl}</button><span class="muted" style="text-align:center;font-size:13px">Se abre en su navegador, sin instalar nada. Enlace personal, vence en 72 horas.</span></div></div>`;
@@ -358,14 +382,14 @@ function P2(){
  ensureBooked();const p=S.p,b=p.booked;
  return `<div class="app"><div class="amain" style="padding-top:36px">
  <div class="big"><div class="circle" style="background:#E3F0EA">${ICON.check}</div><h1 class="t">¡Su cita está reservada!</h1><p class="muted" style="font-size:16px">Le enviamos los detalles a su correo. La asistente le escribirá por WhatsApp para confirmar.</p></div>
- <div class="card"><div class="kv"><span>Fecha</span><b>${fmt(b)}</b></div><div class="kv"><span>Hora</span><b>${b.s} (45 min)</b></div><div class="kv"><span>Modalidad</span><b>${b.mod}</b></div><div class="kv"><span>${b.mod==='Presencial'?'Lugar':'Enlace'}</span><b>${b.mod==='Presencial'?'Consultorio [N.º]':'Zoom (le llegará antes)'}</b></div>
+ <div class="card"><div class="kv"><span>Fecha</span><b>${fmt(b)}</b></div><div class="kv"><span>Hora</span><b>${b.s} (45 min)</b></div><div class="kv"><span>Modalidad</span><b>${b.mod}</b></div><div class="kv"><span>${b.mod==='Presencial'?'Lugar':'Enlace'}</span><b>${b.mod==='Presencial'?'Consultorio [N.º]':'Zoom · le llega 1 día antes'}</b></div>
   <div class="kv"><span>Asistencia</span>${chip(p.conf?'Confirmada':'Por confirmar')}</div><div class="kv"><span>Historia clínica</span>${chip(p.hst)}</div>
   <div class="kv"><span>2.ª consulta</span>${p.second?`<b>${fmtS(p.second)}</b>`:chip('Sin elegir')}</div></div>
  <div class="card"><h2 class="s">Lo que viene</h2><p class="muted" style="font-size:15px">• 3 días antes: mensaje para confirmar su asistencia.<br>• 1 día antes: su código QR de acceso al edificio.<br>• 24 horas y 3 horas antes: recordatorios.</p><button class="back" style="font-size:14px" ${A('go','P8')}>Ver ejemplo de los mensajes ›</button></div>
  </div><div class="afoot">
  ${p.hst==='Completa'?'<button class="b" disabled>Historia clínica enviada</button>':`<button class="b" ${A('go','P3')}>${p.hst==='En progreso'?'Continuar mi historia clínica':'Llenar mi historia clínica'}</button>`}
  ${p.second?'':`<button class="b o" ${A('segunda')}>Elegir mi 2.ª consulta del plan</button>`}
- <button class="b o" ${A('go','P4')}>Ver o cambiar mi cita</button></div></div>`;
+ <button class="b o" ${A('go','P4')}>Ver o cambiar mi cita</button>${waA()}</div></div>`;
 }
 function P3(){
  const p=S.p,st=p.hstep,names=['Datos personales y seguro','Antecedentes y hábitos','Alimentación habitual','Exámenes y consentimiento'];
@@ -376,7 +400,8 @@ function P3(){
   <label class="fld">Ocupación<input id="h1o" value="${esc(V('h1o','Contadora'))}"></label>
   <button class="check" ${A('menor')} aria-pressed="${p.menor}"><span class="box2 ${p.menor?'on':''}">${p.menor?ICON.tick:''}</span>La consulta es para un menor de edad</button>
   ${p.menor?`<div class="card"><h2 class="s">Datos del representante</h2><label class="fld">Nombre del representante *<input id="h1rn" value="${esc(V('h1rn',''))}"></label><label class="fld">Cédula del representante *<input id="h1rc" value="${esc(V('h1rc',''))}"></label><p class="muted" style="font-size:13px">El representante acepta el consentimiento en el paso 4.</p></div>`:''}`;
- if(st===2) body=`<div style="display:flex;flex-direction:column;gap:8px"><span class="s">¿Tiene alguna de estas condiciones? *</span><div class="pills">${['Hipertensión','Diabetes','Tiroides','Colesterol alto','Ninguna'].map(c=>`<button class="pill ${p.cond.includes(c)?'on':''}" aria-pressed="${p.cond.includes(c)}" ${A('cond',c)}>${c}</button>`).join('')}</div></div>
+ if(st===2) body=`<div style="display:flex;flex-direction:column;gap:8px"><span class="s">¿Sufre alguna enfermedad o tiene antecedentes de alguna? *</span><div class="pills">${['Hipertensión','Diabetes','Hipo o hipertiroidismo','Colesterol o triglicéridos altos','Enfermedad cardiovascular','Otro trastorno hormonal o metabólico','Otra','Ninguna'].map(c=>`<button class="pill ${p.cond.includes(c)?'on':''}" aria-pressed="${p.cond.includes(c)}" ${A('cond',c)}>${c}</button>`).join('')}</div></div>
+  ${p.cond.includes('Otra')?`<label class="fld">¿Cuál?<input id="h2o" value="${esc(V('h2o',''))}"></label>`:''}
   <label class="fld">Medicamentos que toma actualmente *<textarea rows="2" id="h2m">${esc(V('h2m','Losartán 50 mg, una vez al día'))}</textarea></label>
   <label class="fld">Alergias o intolerancias alimentarias<input id="h2a" value="${esc(V('h2a',''))}" placeholder="Ejemplo: lactosa, maní"></label>
   <label class="fld">Actividad física semanal *<select id="h2f"><option>1 a 2 veces por semana</option><option>3 o más veces</option><option>Ninguna</option></select></label>`;
@@ -405,7 +430,7 @@ function P4(){
  <div class="card"><h2 class="s">Plan mensual · noviembre</h2><div class="g2">
   <div style="background:#E3F0EA;border-radius:10px;padding:10px;font-size:14px"><b style="color:#1E6B57">1.ª consulta</b><br>${fmtS(b)}</div>
   ${p.second?`<div style="background:#E3F0EA;border-radius:10px;padding:10px;font-size:14px"><b style="color:#1E6B57">2.ª consulta</b><br>${fmtS(p.second)}</div>`:`<button class="opt" style="font-size:14px" ${A('segunda')}>+ Elegir 2.ª consulta</button>`}</div>
-  <span class="muted" style="font-size:13px">Las consultas que no se usen en el mes se pierden.</span></div>
+  <span class="muted" style="font-size:13px">Las consultas que no se usen en 30 días se consideran tomadas.</span></div>
  ${p.repro<1?`<button class="b o" ${A('repro')}>Reprogramar</button>`:'<button class="b o" disabled>Ya usó su reprogramación</button>'}
  <button class="b r" ${A('cancelAsk')}>Cancelar cita</button>
  <p class="muted">Puede reprogramar una vez con anticipación sin perder la consulta. Para cancelar, hágalo al menos 1 día antes. Si llega más de 15 minutos tarde, la cita se reprograma.</p>
@@ -428,7 +453,7 @@ function D1(){return `<div class="app"><div class="amain" style="padding:64px 28
  <p class="err" id="lerr" hidden>Escriba su correo y contraseña.</p>
  <button class="b" ${A('login')}>Ingresar</button>
  <button class="b o" ${A('login','face')}>Ingreso rápido con Face ID</button>
- <p class="muted" style="text-align:center;font-size:13px">La primera vez se ingresa con correo y contraseña. La sesión dura hasta 1 día.</p></div></div>`;}
+ <p class="muted" style="text-align:center;font-size:13px">La primera vez se ingresa con correo y contraseña. La sesión dura hasta 1 día; si no usa la app por 15 minutos, se bloquea y se abre con Face ID.</p></div></div>`;}
 function D2(){
  const d=S.d,ap=d.appts.filter(a=>!a.cancel);
  const n=ap.length,c=ap.filter(a=>a.est==='Confirmada').length,hp=ap.filter(a=>a.hist==='Pendiente').length;
@@ -436,10 +461,10 @@ function D2(){
  const strip=`<div class="g6">${WEEKS[0].days.map((x,i)=>`<button class="opt dk day ${i===d.day?'on':''}" style="min-height:50px" ${x[2]==='fer'?'disabled':A('dday',i)}>${x[0]}<b style="font-size:16px">${x[1]}</b></button>`).join('')}</div>`;
  if(d.view==='lista'&&d.day!==1){
   const col=S.a.week[d.day];
-  body=strip+col.map(e=>e.est==='Cancelada'?`<button class="appt dash" ${A('toast','Horario cancelado. La asistente puede ofrecerlo a la lista de espera.')}><div class="h"><b style="color:#55625E">${e.t}</b></div><div class="i"><b style="color:#4A5753">Horario cancelado</b></div></button>`:`<button class="appt" ${A('ficha',S.a.pacs.some(p=>p.n===e.n)?e.n:'Andrea Salazar')}><div class="h"><b>${e.t}</b><span>45 min</span></div><div class="i"><b>${esc(e.n)}</b><span class="muted">${e.mod}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${chip(e.est)}${e.hist==='Completa'?'<span class="chip ok">Historia completa</span>':'<span class="chip wa">Historia pendiente</span>'}</div></div></button>`).join('');
+  body=strip+col.map(e=>e.est==='Cancelada'?`<button class="appt dash" ${A('toast','Horario cancelado. La asistente puede ofrecerlo a la lista de espera.')}><div class="h"><b style="color:#55625E">${e.t}</b></div><div class="i"><b style="color:#4A5753">Horario cancelado</b></div></button>`:`<button class="appt" ${A('ficha',S.a.pacs.some(p=>p.n===e.n)?e.n:'Andrea Salazar')}><div class="h"><b>${e.t}</b><span>45 min</span></div><div class="i"><b>${esc(e.n)}</b><span class="muted">${e.mod}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${tchip(e.n)}${chip(e.est)}${e.hist==='Completa'?'<span class="chip ok">Historia completa</span>':'<span class="chip wa">Historia pendiente</span>'}</div></div></button>`).join('');
  } else if(d.view==='lista'){
   body=strip+d.appts.map(a=>a.cancel?`<button class="appt dash" ${A('toast','Horario cancelado. La asistente puede ofrecerlo a la lista de espera desde su panel.')}><div class="h"><b style="color:#55625E">${a.t}</b></div><div class="i"><b style="color:#4A5753">Horario cancelado</b><span class="muted">2 pacientes en lista de espera</span></div></button>`
-  :`<button class="appt" ${A('openA',a.id)}><div class="h"><b>${a.t}</b><span>${a.dur}</span></div><div class="i"><b>${a.n}</b><span class="muted">${a.mod} · ${a.tipo}${a.plan?' · '+a.plan:''}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${chip(a.est)}${chip(a.hist==='Completa'?'Completa':'Pendiente').replace('>Completa<','>Historia completa<').replace('>Pendiente<','>Historia pendiente<')}</div></div></button>`).join('');
+  :`<button class="appt" ${A('openA',a.id)}><div class="h"><b>${a.t}</b><span>${a.dur}</span></div><div class="i"><b>${a.n}</b><span class="muted">${a.mod} · ${a.tipo}${a.plan?' · '+a.plan:''}</span><div style="display:flex;gap:6px;flex-wrap:wrap">${tchip(a.n)}${chip(a.est)}${chip(a.hist==='Completa'?'Completa':'Pendiente').replace('>Completa<','>Historia completa<').replace('>Pendiente<','>Historia pendiente<')}</div></div></button>`).join('');
  } else {
   const W=S.a.week;
   body=WEEKS[0].days.map((x,i)=>{const col=W[i];if(col==='fer')return `<div class="card" style="background:#F1F2EF"><div class="kv"><b>${x[0]} ${x[1]}</b><span class="muted">Feriado</span></div></div>`;
@@ -448,8 +473,11 @@ function D2(){
  return `<div class="app"><div class="ahdr"><div class="kv"><h1 class="t">Agenda</h1><span class="muted">${d.view==='lista'?FULL[WEEKS[0].days[d.day][0]].replace(/^./,c=>c.toUpperCase())+' '+WEEKS[0].days[d.day][1]+' nov':'9 al 14 nov'}</span></div>
  <div class="seg"><button class="${d.view==='lista'?'on':''}" ${A('dview','lista')}>Lista</button><button class="${d.view==='semana'?'on':''}" ${A('dview','semana')}>Semana</button></div>
  ${d.view==='lista'&&d.day===1?`<span class="muted"><b style="color:#1C2B27">${n} citas</b> · ${c} confirmadas · ${hp} historias pendientes</span>`:''}</div>
+ ${d.off?`<div style="background:#FCEFD9;color:#6B3A00;padding:10px 16px;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:8px"><span><b>Sin internet.</b> Está viendo lo guardado a las 15:10. Lo que agregue se enviará al reconectar.</span><button class="b sm o" style="width:auto" ${A('online')}>Reconectar</button></div>`:''}
  <div class="amain" style="padding:14px 16px;gap:10px">${body}</div>${bnav('D2')}</div>`;
 }
+function nv(n){return ['María Torres','Jorge Molina','Rosa Mejía','Iván Soto','Marco Vélez'].includes(n);}
+function tchip(n){return nv(n)?'<span class="chip wa">Paciente nuevo</span>':'<span class="chip ne">Control</span>';}
 function curA(){return S.d.appts.find(a=>a.id===S.d.sel)||S.d.appts[0];}
 function D3(){
  const a=curA();
@@ -457,7 +485,7 @@ function D3(){
  return `<div class="app"><div class="ahdr"><button class="back" ${A('go','D2')}>‹ Agenda</button><h1 class="t">${a.n}</h1><span class="muted" style="font-size:15px">Hoy · ${a.t} · ${a.dur} · ${a.mod}</span></div>
  <div class="amain" style="padding:16px">
  <div class="qa"><button ${A('toast','Se abriría WhatsApp con '+a.n+' ('+a.tel+').')}>${ICON.chat}WhatsApp</button><button ${A('toast','Se llamaría al '+a.tel+'.')}>${ICON.phone}Llamar</button><button ${A('ficha',a.n)}>${ICON.doc}Ficha</button><button ${done?'disabled style="opacity:.5"':A('moveAsk')}>${ICON.move}Mover</button></div>
- <div class="card"><div class="kv"><span>Estado</span>${chip(a.est)}</div><div class="kv"><span>Historia clínica</span>${chip(a.hist)}</div><div class="kv"><span>Tipo</span><b>${a.tipo}</b></div>${a.plan?`<div class="kv"><span>Plan</span><b>${a.plan.replace('Plan ','Consulta ')}</b></div>`:''}${a.mod.startsWith('Virtual')?`<div class="kv"><span>Zoom</span><button class="b sm o" ${A('toast','Se abriría la reunión de Zoom.')}>Abrir reunión</button></div>`:''}</div>
+ <div class="card"><div class="kv"><span>Estado</span>${chip(a.est)}</div><div class="kv"><span>Historia clínica</span>${chip(a.hist)}</div><div class="kv"><span>Tipo</span><b>${a.tipo}</b></div>${a.plan?`<div class="kv"><span>Plan</span><b>${a.plan.replace('Plan ','Consulta ')}</b></div>`:''}${a.mod.startsWith('Virtual')?`<div class="kv"><span>Zoom</span><button class="b sm o" ${A('toast','Se abriría la reunión de Zoom.')}>Abrir reunión</button></div>`:''}<div class="kv"><span>En Outlook</span><b>${outLbl(a.n)}</b></div></div>
  <div class="card"><h2 class="s">Nota de la última consulta</h2><p class="muted" style="font-size:15px">${(S.d.notes[a.n]||['Sin notas previas.'])[0]}</p></div>
  ${done?`<p class="muted" style="text-align:center">Cita marcada como «${a.est}».</p><button class="b o" ${A('undoA')}>Deshacer</button>`:`<div class="g2" style="margin-top:auto"><button class="b o" style="color:#1C2B27;border-color:#9AA6A0" ${A('markA','No asistió')}>No asistió</button><button class="b" ${A('markA','Atendida')}>Marcar atendida</button></div>`}
  </div>${bnav('D2')}</div>`;
@@ -467,6 +495,7 @@ function D4(){
  let body='';
  if(d.tab==='Resumen') body=`<div style="background:#1E6B57;color:#fff;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:4px"><span class="eyebrow" style="opacity:.9">Próxima cita</span><b style="font-size:18px">${pac.next==='Sin cita'?'Sin cita agendada':pac.next+' · Presencial'}</b><span style="font-size:14px">${pac.plan.includes('de 2')?'Plan mensual · '+pac.plan:'Paciente por consulta'}</span></div>
   <div class="card"><h2 class="s">Últimas mediciones</h2><div class="g3" style="text-align:center"><div style="background:#F6F7F4;border-radius:10px;padding:10px 4px"><b style="font-size:18px">68,4 kg</b><br><span class="muted" style="font-size:12px">Peso · −1,2</span></div><div style="background:#F6F7F4;border-radius:10px;padding:10px 4px"><b style="font-size:18px">29,1 %</b><br><span class="muted" style="font-size:12px">Grasa · −0,8</span></div><div style="background:#F6F7F4;border-radius:10px;padding:10px 4px"><b style="font-size:18px">25,3 kg</b><br><span class="muted" style="font-size:12px">Músculo · +0,3</span></div></div></div>
+  <div class="card"><h2 class="s">Indicadores calculados</h2><div class="kv"><span>IMC</span><b>25,3 · Sobrepeso</b></div><div class="kv"><span>Riesgo cardiovascular</span><b>Moderado</b></div><span class="muted" style="font-size:13px">Se calculan con la historia clínica y las mediciones. [Escalas por definir con la doctora]</span></div>
   <div class="card"><h2 class="s">Datos</h2><span class="muted" style="font-size:15px">C.I. ${pac.ci} · ${pac.tipo}${pac.der?' por '+pac.der:''}</span><span class="muted" style="font-size:15px">Etiqueta: ${pac.tag}</span></div>`;
  if(d.tab==='Mediciones') body=`<div class="card"><h2 class="s">Historial InBody</h2><table class="mt"><thead><tr><th>Fecha</th><th>Peso</th><th>Grasa</th><th>Músculo</th></tr></thead><tbody><tr><td>27 oct</td><td>68,4 kg</td><td>29,1 %</td><td>25,3 kg</td></tr><tr><td>13 oct</td><td>69,0 kg</td><td>29,5 %</td><td>25,1 kg</td></tr><tr><td>6 oct</td><td>69,6 kg</td><td>29,9 %</td><td>25,0 kg</td></tr></tbody></table></div><button class="b o" ${A('toast','Se abriría el selector para adjuntar el PDF del InBody de hoy.')}>+ Adjuntar InBody de hoy</button>`;
  if(d.tab==='Exámenes') body=['InBody · 27 oct 2026','InBody · 13 oct 2026','Hemograma · 20 oct 2026'].map(x=>`<button class="appt" style="align-items:center" ${A('pdf',x)}><div class="i"><b style="font-size:15px">${x}</b><span class="muted">PDF</span></div><span style="color:#1E6B57;font-weight:700">Ver</span></button>`).join('');
@@ -492,6 +521,9 @@ function D7(){return `<div class="app"><div class="ahdr"><h1 class="t">Más opci
  <span class="muted" style="font-size:13px">Los reportes en PDF o Excel se descargan desde el panel web.</span></div>
  <button class="appt" style="align-items:center" ${A('go','D8')}><div class="i"><b style="font-size:16px">Editar formulario de historia clínica</b><span class="muted">Agregar, quitar o cambiar preguntas</span></div><span style="color:#1E6B57;font-weight:700">›</span></button>
  <button class="appt" style="align-items:center" ${A('go','D9')}><div class="i"><b style="font-size:16px">Bloquear horario personal</b><span class="muted">Se refleja en la agenda y en Outlook</span></div><span style="color:#1E6B57;font-weight:700">›</span></button>
+ <button class="appt" style="align-items:center" ${A('offline')}><div class="i"><b style="font-size:16px">Probar el modo sin internet</b><span class="muted">Su agenda y las fichas se pueden ver sin conexión</span></div><span style="color:#1E6B57;font-weight:700">›</span></button>
+ <button class="appt" style="align-items:center" ${A('toast','En su computador, abra panel.nutriagenda.app e ingrese con su cuenta: verá las mismas fichas y podrá registrar notas y mediciones durante la consulta.')}><div class="i"><b style="font-size:16px">Usar en el computador</b><span class="muted">Registre notas y mediciones desde el panel web</span></div><span style="color:#1E6B57;font-weight:700">›</span></button>
+ <button class="appt" style="align-items:center" ${A('go','D10')}><div class="i"><b style="font-size:16px">Seguridad de la sesión</b><span class="muted">Se bloquea tras 15 min sin uso · sesión de hasta 1 día</span></div><span style="color:#1E6B57;font-weight:700">›</span></button>
  <button class="appt" style="align-items:center" ${A('logoutAllDoc')}><div class="i"><b style="font-size:16px">Cerrar sesión en todos los dispositivos</b><span class="muted">Si perdió su celular o computador</span></div><span style="color:#1E6B57;font-weight:700">›</span></button>
  <button class="b r" ${A('logoutDoc')}>Cerrar sesión</button></div>${bnav('D7')}</div>`;}
 function D8(){const d=S.d,sec=d.form[d.fsec];
@@ -501,6 +533,12 @@ function D8(){const d=S.d,sec=d.form[d.fsec];
  ${sec.qs.map((q,i)=>`<div class="card" style="flex-direction:row;align-items:center;gap:10px;padding:12px"><div style="flex:1;display:flex;flex-direction:column;gap:6px"><b style="font-size:15px">${esc(q[0])}</b><button class="chip ${q[1]?'ok':'ne'}" style="border:0;align-self:flex-start;cursor:pointer;min-height:28px" ${A('freq',i)}>${q[1]?'Obligatoria':'Opcional'} · cambiar</button></div><button class="b sm r" style="min-height:38px" ${A('fdel',i)}>Quitar</button></div>`).join('')}
  <button class="b o" ${A('faddAsk')}>+ Agregar pregunta</button></div>
  <div class="afoot"><button class="b" ${A('fsaveAsk')}>Guardar cambios</button><span class="muted" style="text-align:center;font-size:13px">Los pacientes nuevos verán el formulario actualizado.</span></div></div>`;}
+function D10(){return `<div class="app"><div class="amain" style="justify-content:center;padding:32px 28px;gap:22px">
+ <div class="big"><div class="circle" style="background:#E3F0EA">${ICON.user}</div><h1 class="t">NutriAgenda está bloqueada</h1><p class="muted" style="font-size:16px">Por seguridad, la app se bloquea si no la usa por 15 minutos. Lo que estaba escribiendo se conserva y sigue donde lo dejó.</p></div>
+ <button class="b" ${A('unlock')}>Desbloquear con Face ID</button>
+ <button class="b o" ${A('logoutDoc')}>Ingresar con correo y contraseña</button>
+ <p class="muted" style="text-align:center;font-size:13px">Pasado 1 día, la sesión se cierra y hay que ingresar de nuevo con correo y contraseña. [Tiempos por confirmar con la doctora.]</p></div></div>`;}
+function outLbl(n){const o=S.a.outName;if(o==='Nombre completo')return n;if(o==='Solo iniciales')return 'Cita · '+n.split(' ').filter(w=>/^[A-ZÁÉÍÓÚÑ]/.test(w)).map(w=>w[0]+'.').join(' ');return 'Cita de nutrición';}
 function D9(){const bl=S.d.blocks;return `<div class="app"><div class="ahdr"><button class="back" ${A('go','D7')}>‹ Más</button><h1 class="t">Bloquear horario</h1><span class="muted">Para su agenda personal: esos horarios no se ofrecen a los pacientes.</span></div>
  <div class="amain">
  <label class="fld">Día<select id="bd"><option>Miércoles 11 nov</option><option>Jueves 12 nov</option><option>Sábado 14 nov</option><option>Lunes 16 nov</option></select></label>
@@ -523,6 +561,8 @@ function drawer(){
  if(dr.t==='ev'){const e=findEv(dr.id);if(!e)return '';
   return `<aside class="drawer"><div class="kv"><h2 style="margin:0;font-size:20px">${esc(e.n)}</h2><button class="wb k" ${A('closeDr')}>Cerrar</button></div>
   <div class="kv"><span>Hora</span><b>${e.t}</b></div><div class="kv"><span>Modalidad</span><b>${e.mod}</b></div><div class="kv"><span>Estado</span>${chip(e.est)}</div><div class="kv"><span>Historia clínica</span>${chip(e.hist)}</div>
+  <div class="kv"><span>En Outlook</span><b>${outLbl(e.n)}</b></div>
+  ${e.mod.startsWith('Virtual')&&e.est!=='Cancelada'?`<div class="kv"><span>Videollamada</span><b>${S.a.tool}</b></div><button class="wb o" ${A('toast','Enlace de '+S.a.tool+' copiado. También va en el evento de Outlook y en el recordatorio del paciente.')}>Copiar enlace de la videollamada</button>`:''}
   ${e.est==='Cancelada'?`<p class="muted">El horario no se libera solo. Puede ofrecerlo a la lista de espera.</p><button class="wb" ${A('offer','Carmen Ortiz')}>Ofrecer a Carmen Ortiz</button>`:`
   ${e.est!=='Confirmada'?`<button class="wb" ${A('evConf',e.id)}>Marcar como confirmada</button>`:''}
   ${e.hist==='Pendiente'?`<button class="wb o" ${A('toast','Recordatorio para llenar la historia clínica listo en Mensajes.')}>Recordar historia clínica</button>`:''}
@@ -565,7 +605,7 @@ function A8(){const a=S.a,t=a.tpls[a.tpl];
  <aside class="wcard" style="width:360px;flex-shrink:0"><h2>${t[0]} · ${t[1]}</h2>
  <label class="fw">Canal<select id="tch">${['Correo','WhatsApp'].map(c=>`<option ${c===t[2]?'selected':''}>${c}</option>`).join('')}</select></label>
  <label class="fw">Texto<textarea id="ttx" data-nokeep rows="7" style="font:400 14.5px var(--app);padding:10px;border:1px solid #C9D1CC;border-radius:8px;resize:vertical">${esc(t[3])}</textarea></label>
- <div style="display:flex;gap:6px;flex-wrap:wrap">${['{nombre}','{fecha}','{hora}','{enlace}','{proxima}'].map(v=>`<button class="chip ne" style="border:0;cursor:pointer;min-height:28px" ${A('tvar',v)}>${v}</button>`).join('')}</div>
+ <div style="display:flex;gap:6px;flex-wrap:wrap">${['{nombre}','{fecha}','{hora}','{enlace}','{proxima}','{descuento}'].map(v=>`<button class="chip ne" style="border:0;cursor:pointer;min-height:28px" ${A('tvar',v)}>${v}</button>`).join('')}</div>
  <button class="wb" ${A('tsave')}>Guardar plantilla</button>
  <span class="muted" style="font-size:12.5px">Trato de usted, tono formal y cercano. Si un envío cae de noche o en fin de semana, se adelanta al último horario hábil (pendiente de confirmar con la doctora).</span></aside></div>`,'mensajes/plantillas');}
 function A1(){
@@ -579,8 +619,9 @@ function A1(){
   grid=`<section class="wcard" style="flex:1;min-width:0;padding:0;overflow:hidden"><table class="tbl"><thead><tr><th>Día</th><th>Hora</th><th>Paciente</th><th>Modalidad</th><th>Estado</th><th>Historia</th></tr></thead><tbody>${rows.map(([d,e])=>`<tr class="click" ${A('ev',e.id)}><td>${d[0]} ${d[1]}</td><td>${e.t}</td><td><b>${esc(e.n)}</b></td><td>${e.mod}</td><td>${chip(e.est==='Ofrecido'?'Ofrecido':e.est)}</td><td>${chip(e.hist)}</td></tr>`).join('')}</tbody></table></section>`;
  }
  const pend=a.msgs.filter(m=>m.est==='Listo para enviar').length,pagos=a.pk.filter(p=>p.est==='Por pagar').length;
- return wshell('A1',`<div class="wh"><div><h1>Agenda · semana del 9 al 14 de noviembre</h1><span class="muted">Sincronizada con Outlook hace 2 min · los cambios hechos en Outlook también se reflejan aquí</span></div>
+ return wshell('A1',`<div class="wh"><div><h1>Agenda · semana del 9 al 14 de noviembre</h1><span class="muted">${a.sync==='ok'?'Sincronizada con Outlook hace 1 min':'Última sincronización con Outlook: 15:05'} · los cambios hechos en Outlook también se reflejan aquí</span></div>
  <div style="display:flex;gap:8px"><div class="fltr">${['Semana','Lista'].map(v=>`<button class="${a.view===v?'on':''}" ${A('aview',v)}>${v}</button>`).join('')}</div><button class="wb" ${A('newApptAsk')}>+ Agendar cita</button></div></div>
+ ${a.sync==='fail'?`<div class="wbanner"><span><b>Outlook no respondió a las 15:10.</b> El sistema reintenta solo cada minuto. Las citas nuevas se guardan aquí y pasan a Outlook al reconectar.</span><button class="wb" ${A('syncNow')}>Reintentar ahora</button></div>`:''}
  <div class="wrow">${grid}
  <aside class="rside" style="width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:14px">
   <div class="wcard"><h2>Lista de espera</h2>${a.wait.map((w,i)=>`<div class="kv" style="font-size:14px;${i?'border-top:1px solid #EEF0EC;padding-top:10px':''}"><span style="color:#1C2B27"><b>${w.n}</b><br><span class="muted" style="font-size:13px">${w.x}</span></span>${a.offered===w.n?chip('Ofrecido'):`<button class="wb o" ${a.offered?'disabled':A('offer',w.n)}>Ofrecer 17:15</button>`}</div>`).join('')}
@@ -615,6 +656,8 @@ function msgText(m){
  'Confirmación de asistencia':`Buenas tardes, ${nm}. Su cita de nutrición es el <b>${m.cita.replace(' · ',' a las ')}</b>.<br><br>¿Nos confirma su asistencia? Puede hacerlo aquí: [enlace]`,
  'Recordatorio 3 h antes':`Hola, ${nm}. Le esperamos <b>${m.cita.replace(' · ',' a las ')}</b>. Recuerde llegar 10 minutos antes; hay 15 minutos de tolerancia.`,
  'Agradecimiento + InBody':`Gracias por su visita, ${nm}. Adjuntamos el resultado de su InBody de hoy. Su próxima cita es el 24 de noviembre a las 14:00.`,
+ 'Felicitación de cumpleaños':`¡Feliz cumpleaños, ${nm}! 🎉 Por su día tiene <b>${S.a.auto.cum[3]} de descuento</b> en su próxima consulta de este mes.`,
+ 'Invitar a volver':`Hola, ${nm}. Hace un tiempo que no la vemos en consulta. Si desea retomar su plan, puede reservar aquí: [enlace]`,
  'Bienvenida e historia clínica':`Bienvenida, ${nm}. Su cita quedó reservada para el <b>${m.cita.replace(' · ',' a las ')}</b>.<br><br>Por favor, llene su historia clínica antes de la consulta: [enlace]`};
  return t[m.tipo];
 }
@@ -624,7 +667,7 @@ function A3(){
  <section class="wcard" style="padding:0;overflow:hidden"><table class="tbl"><thead><tr><th>Fecha</th><th>Paciente</th><th>Mensaje</th><th>Canal</th><th>Estado</th></tr></thead><tbody>${[['9 nov 18:10','Andrea Salazar','Código QR de acceso','WhatsApp','Enviado'],['9 nov 14:00','Andrea Salazar','Recordatorio 24 h antes','Correo','Enviado'],['7 nov 15:02','Luis Paredes','Confirmación de asistencia','WhatsApp','Enviado'],['6 nov 16:40','Diego Cruz','Recordatorio de historia clínica','WhatsApp','Enviado'],['6 nov 11:15','Paula Vera','Bienvenida e historia clínica','Correo','Enviado'],['5 nov 17:30','Tomás Reyes','Agradecimiento + InBody','Correo','Enviado']].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${chip(r[4])}</td></tr>`).join('')}</tbody></table></section>`,'mensajes/historial');
  return wshell('A3',`<div class="wh"><div><h1>Mensajes de hoy</h1><span class="muted">Los correos salen solos. Los WhatsApp quedan listos: revise y envíe con un clic. Nada se envía de noche ni en fin de semana.</span></div></div>${mtabs()}
  <div class="wrow"><section class="wcard" style="flex:1;min-width:0;padding:0;overflow:hidden"><table class="tbl"><thead><tr><th>Mensaje</th><th>Paciente</th><th>Canal</th><th>Estado</th><th>Acción</th></tr></thead><tbody>
- ${a.msgs.map((x,i)=>`<tr class="click ${i===a.msg?'sel':''}" ${A('msg',i)}><td><b>${x.tipo}</b><br><span class="muted" style="font-size:13px">Cita ${x.cita}</span></td><td>${x.n}</td><td>${x.canal}</td><td>${x.est==='Falló'?chip('Falló'):chip(x.est)}</td><td>${x.est==='Listo para enviar'?`<button class="wb" ${A('send',i)}>Abrir WhatsApp</button>`:x.est==='Falló'?`<button class="wb r" ${A('send',i)}>Reintentar</button>`:'<span class="muted">Ver</span>'}</td></tr>`).join('')}
+ ${a.msgs.map((x,i)=>`<tr class="click ${i===a.msg?'sel':''}" ${A('msg',i)}><td><b>${x.tipo}</b><br><span class="muted" style="font-size:13px">${x.sub||'Cita '+x.cita}</span></td><td>${x.n}</td><td>${x.canal}</td><td>${x.est==='Falló'?chip('Falló'):chip(x.est)}</td><td>${x.est==='Listo para enviar'?`<button class="wb" ${A('send',i)}>Abrir WhatsApp</button>`:x.est==='Falló'?`<button class="wb r" ${A('send',i)}>Reintentar</button>`:'<span class="muted">Ver</span>'}</td></tr>`).join('')}
  </tbody></table></section>
  <aside class="wcard" style="width:320px;flex-shrink:0"><h2>Vista previa · ${m.tipo}</h2><div class="bubble">${msgText(m)}</div>
  ${m.tipo==='Código QR de acceso'?'<div style="height:90px;border:1px dashed #C9D1CC;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#55625E">[Imagen del código QR]</div>':''}
@@ -634,7 +677,7 @@ function A3(){
 function A4(){
  const a=S.a,act=a.pk.filter(p=>p.est!=='Cerrado').length,ren=a.pk.filter(p=>p.est==='Por renovar').length;
  return wshell('A4',`<div class="wh"><h1>Paquetes y pagos · noviembre 2026</h1></div>
- <div class="tiles"><div class="tile"><span>Planes activos</span><b>${act}</b></div><div class="tile"><span>Por renovar</span><b style="color:#8A4B00">${ren}</b></div><div class="tile"><span>Consultas perdidas</span><b>1</b></div><div class="tile"><span>Ingresos del mes</span><b>$ ${a.ingresos}</b></div></div>
+ <div class="tiles"><div class="tile"><span>Planes activos</span><b>${act}</b></div><div class="tile"><span>Por renovar</span><b style="color:#8A4B00">${ren}</b></div><div class="tile"><span>Consultas tomadas sin asistir</span><b>1</b></div><div class="tile"><span>Ingresos del mes</span><b>$ ${a.ingresos}</b></div></div>
  <div class="wrow"><section class="wcard" style="flex:1;min-width:0;padding:0;overflow:hidden"><table class="tbl"><thead><tr><th>Paciente</th><th>Consultas</th><th>Fechas elegidas</th><th>Último pago</th><th>Estado</th></tr></thead><tbody>
  ${a.pk.map(p=>`<tr class="click" ${A('pkSel',p.n)}><td><b>${p.n}</b></td><td>${p.c}</td><td>${p.f}</td><td>${p.pago}</td><td>${chip(p.est)}</td></tr>`).join('')}</tbody></table></section>
  <form class="wcard" style="width:300px;flex-shrink:0" onsubmit="return false"><h2>Registrar pago</h2>
@@ -666,18 +709,20 @@ function A6(){
  const a=S.a;
  return wshell('A6',`<div class="wh"><h1>Configuración</h1></div>
  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
- <section class="wcard"><h2>Horario de atención</h2><div class="kv"><span>Lunes a viernes</span><b>${a.horario.lv}</b></div><div class="kv"><span>Sábado</span><b>${a.horario.sab}</b></div><div class="kv"><span>Duración de consulta</span><b>45 min (hasta 1 h)</b></div><div class="kv"><span>Tolerancia</span><b>15 min</b></div><div class="kv"><span>Envío de mensajes</span><b>L a V, 08:00 a 19:00</b></div><button class="wb o" style="align-self:flex-start" ${A('horAsk')}>Editar horario</button></section>
+ <section class="wcard"><h2>Horario de atención</h2><div class="kv"><span>Lunes a viernes</span><b>${a.horario.lv}</b></div><div class="kv"><span>Sábado</span><b>${a.horario.sab}</b></div><div class="kv"><span>Duración de consulta</span><b>45 min (hasta 1 h)</b></div><div class="kv"><span>Tolerancia</span><b>15 min</b></div><div class="kv"><span>Envío de mensajes</span><b>L a V, 08:00 a 19:00</b></div><div class="kv"><span>Idioma y zona horaria</span><b>Español · Guayaquil (UTC−5)</b></div><button class="wb o" style="align-self:flex-start" ${A('horAsk')}>Editar horario</button></section>
  <section class="wcard"><h2>Feriados y vacaciones</h2>${a.fer.map((f,i)=>`<div class="kv"><span>${f[0]}</span><span style="display:flex;gap:8px;align-items:center"><b>${f[1]}</b><button class="wb k" style="min-height:30px;padding:0 8px" ${A('delFer',i)} aria-label="Quitar ${f[0]}">Quitar</button></span></div>`).join('')}<span class="muted" style="font-size:13px">Los horarios de estos días no se muestran a los pacientes.</span><button class="wb o" style="align-self:flex-start" ${A('ferAsk')}>+ Agregar fecha</button></section>
  <section class="wcard"><h2>Formulario de historia clínica</h2>${['Datos personales y seguro · 6','Antecedentes y hábitos · 8','Alimentación habitual · 7','Exámenes y consentimiento · 3'].map((x,i)=>`<div class="kv" style="background:#F6F7F4;border-radius:8px;padding:8px 10px"><span style="color:#1C2B27">${i+1}. ${x.split(' · ')[0]}</span><span class="muted" style="font-size:13px">${x.split(' · ')[1]} preguntas</span></div>`).join('')}<button class="wb o" style="align-self:flex-start" ${A('toast','Solo la doctora puede editar las preguntas del formulario.')}>Editar preguntas</button></section>
  <section class="wcard"><h2>Usuarios y accesos</h2><div class="kv"><span style="color:#1C2B27"><b>Doctora</b><br><span class="muted" style="font-size:13px">Administradora · iPhone</span></span>${chip('Activa')}</div>
   <div class="kv" style="border-top:1px solid #EEF0EC;padding-top:10px"><span style="color:#1C2B27"><b>Ana P.</b><br><span class="muted" style="font-size:13px">Asistente · computador</span></span>${a.asis?`<button class="wb r" ${A('accAsk','quitar')}>Quitar acceso</button>`:`<span style="display:flex;gap:6px;align-items:center">${chip('Sin acceso')}<button class="wb o" ${A('accAsk','dar')}>Dar acceso</button></span>`}</div>
+  <div class="kv"><span>Bloqueo por inactividad</span><select class="msel" data-in="cfg" data-k="inact">${['5 minutos', '15 minutos', '30 minutos'].map(o=>`<option ${o===a.inact?'selected':''}>${o}</option>`).join('')}</select></div><div class="kv"><span>Duración máxima de sesión</span><select class="msel" data-in="cfg" data-k="maxs">${['8 horas', '1 día', '7 días'].map(o=>`<option ${o===a.maxs?'selected':''}>${o}</option>`).join('')}</select></div>
   <button class="wb k" style="align-self:flex-start" ${A('logoutAsk')}>Cerrar sesión en todos los dispositivos</button><span class="muted" style="font-size:13px">Los cambios importantes piden un código de verificación (2 pasos).</span></section>
- <section class="wcard"><h2>Integraciones</h2><div class="kv"><span>Outlook Calendar (personal)</span><b style="color:#1E6B57">Conectado · ambos sentidos</b></div><div class="kv"><span>Correo de envío (Gmail)</span><b style="color:#1E6B57">Conectado</b></div><div class="kv"><span>WhatsApp</span><b>Envío asistido</b></div><button class="wb o" style="align-self:flex-start" ${A('toast','Sincronizado con Outlook: 18 citas al día.')}>Sincronizar ahora</button></section>
- <section class="wcard"><h2>Datos y respaldos</h2><div class="kv"><span>Último respaldo</span><b>Domingo 8 nov · 02:00</b></div><div class="kv"><span>Frecuencia</span><b>Semanal</b></div><div class="kv"><span>Registro de actividad</span><b>Activo</b></div><button class="wb o" style="align-self:flex-start" ${A('logAsk')}>Ver registro de actividad</button></section>
+ <section class="wcard"><h2>Integraciones</h2><div class="kv"><span>Outlook Calendar (personal)</span>${a.sync==='ok'?'<b style="color:#1E6B57">Conectado · ambos sentidos</b>':'<b style="color:#8A4B00">Falló a las 15:10</b>'}</div><div class="kv"><span>Paciente en el evento de Outlook</span><select class="msel" data-in="cfg" data-k="outName">${['Solo iniciales', 'Nombre completo', 'Solo «Cita de nutrición»'].map(o=>`<option ${o===a.outName?'selected':''}>${o}</option>`).join('')}</select></div><div class="kv"><span>Si Outlook falla</span><b>Aviso + reintento cada minuto</b></div><div class="kv"><span>Consultas en línea</span><select class="msel" data-in="cfg" data-k="tool">${['Zoom', 'Google Meet', 'Videollamada de WhatsApp'].map(o=>`<option ${o===a.tool?'selected':''}>${o}</option>`).join('')}</select></div><div class="kv"><span>Correo de envío (Outlook de la doctora)</span><b style="color:#1E6B57">Conectado</b></div><div class="kv"><span>WhatsApp</span><b>Envío asistido</b></div><button class="wb o" style="align-self:flex-start" ${A('syncNow')}>Sincronizar ahora</button></section>
+ <section class="wcard"><h2>Mensajes automáticos</h2>${Object.entries(a.auto).map(([k,v],i)=>`<div style="display:flex;flex-direction:column;gap:6px;${i?'border-top:1px solid #EEF0EC;padding-top:10px':''}"><div class="kv"><b style="font-size:15px">${v[0]}</b><button class="tog ${v[2]?'on':'off'}" ${A('autoTog',k)} aria-pressed="${v[2]}">${v[2]?'Activo':'Apagado'}</button></div><div class="kv" style="font-size:14px"><span class="muted">${v[1]}: <b style="color:#1C2B27">${v[3]}</b></span><button class="wb k" style="min-height:30px;padding:0 10px" ${A('autoEd',k)}>Cambiar</button></div></div>`).join('')}<span class="muted" style="font-size:13px">Textos en Mensajes › Plantillas. [Valores por confirmar con la doctora.]</span></section>
+ <section class="wcard"><h2>Datos y respaldos</h2><div class="kv"><span>Último respaldo</span><b>Hoy · 02:00</b></div><div class="kv"><span>Frecuencia</span><b>Diaria + copia continua</b></div><div class="kv"><span>Copia legible de historias</span><b>Mensual (Word)</b></div><div class="kv"><span>Registro de actividad</span><b>Activo</b></div><button class="wb o" style="align-self:flex-start" ${A('logAsk')}>Ver registro de actividad</button></section>
  </div>`);
 }
 
-const SCREENS={P0,P1,P2,P3,P3ok,P4,P5,P6,P7,P8,D1,D2,D3,D4,D5,D6,D7,D8,D9,A0,A1,A2,A3,A4,A5,A6,A7,A8};
+const SCREENS={P0,P9,P1,P2,P3,P3ok,P4,P5,P6,P7,P8,D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,A0,A1,A2,A3,A4,A5,A6,A7,A8};
 
 /* ============ ACCIONES ============ */
 const ACT={
@@ -694,7 +739,7 @@ const ACT={
  segunda:()=>{ensureBooked();const p=S.p;p.mode='segunda';p.w=Math.min(2,WEEKS.findIndex(w=>w.days.some(x=>x[1]===p.booked.d[1]))+2);p.di=0;p.slot=null;const wk=WEEKS[p.w],min=p.booked.d[1]+7;p.di=Math.max(0,wk.days.findIndex(x=>x[2]!=='fer'&&x[1]>=min));go('P1');},
  repro:()=>{const p=S.p;p.mode='repro';p.w=0;p.di=2;p.slot=null;go('P1');},
  confirmar:()=>{S.p.conf=true;render();toast('¡Gracias! Su asistencia quedó confirmada.');},
- cancelAsk:()=>modal({t:'¿Cancelar su cita?',b:`Su cita del ${fmt(S.p.booked)} a las ${S.p.booked.s} se cancelará. La consulta del plan de este mes no se recupera.`,ok:['Sí, cancelar','cancelDo'],okRed:true,no:'No, volver'}),
+ cancelAsk:()=>modal({t:'¿Cancelar su cita?',b:`Su cita del ${fmt(S.p.booked)} a las ${S.p.booked.s} se cancelará. Como cancela con al menos 1 día de anticipación, podrá elegir otra fecha dentro de su plan.`,ok:['Sí, cancelar','cancelDo'],okRed:true,no:'No, volver'}),
  cancelDo:()=>{S.p.cancelled=true;S.p.conf=false;S.hist=[];go('P6');},
  newBooking:()=>{const p=S.p;p.booked=null;p.second=null;p.mode='nueva';p.slot=null;p.repro=0;p.w=0;p.di=1;S.hist=[];go('P1');},
  cond:c=>{const p=S.p;if(c==='Ninguna'){p.cond=p.cond.includes('Ninguna')?[]:['Ninguna'];}else{p.cond=p.cond.filter(x=>x!=='Ninguna');p.cond=p.cond.includes(c)?p.cond.filter(x=>x!==c):[...p.cond,c];}render();},
@@ -721,7 +766,7 @@ const ACT={
  markA:e=>{const a=curA();a.prev=a.est;a.est=e;render();toast(e==='Atendida'?'Consulta registrada. Se preparó el mensaje de agradecimiento.':'Marcada como «No asistió». La asistente recibirá el aviso.');},
  undoA:()=>{const a=curA();a.est=a.prev||'Confirmada';render();},
  readAll:()=>{S.d.avisos.forEach(a=>a.read=true);render();},
- aviso:i=>{const a=S.d.avisos[+i];a.read=true;if(a.go==='exc'){modal({t:'Solicitud de excepción',b:a.x,ok:['Aprobar','excDo','ok'],no:'Rechazar'});return;}if(a.go==='D2')go('D2');else if(a.go.startsWith('f:')){S.d.fichaN=a.go.slice(2);S.d.tab='Resumen';go('D4');}else{S.d.sel=a.go;go('D3');}},
+ aviso:i=>{const a=S.d.avisos[+i];a.read=true;if(a.go==='sync'){modal({t:'Outlook no se sincronizó',b:a.x,ok:['Reintentar ahora','syncNow'],no:'Más tarde'});return;}if(a.go==='exc'){modal({t:'Solicitud de excepción',b:a.x,ok:['Aprobar','excDo','ok'],no:'Rechazar'});return;}if(a.go==='D2')go('D2');else if(a.go.startsWith('f:')){S.d.fichaN=a.go.slice(2);S.d.tab='Resumen';go('D4');}else{S.d.sel=a.go;go('D3');}},
  excDo:()=>{S.modal=null;render();toast('Excepción aprobada. La asistente podrá agendar la consulta sin costo.');},
  logoutDoc:()=>{S.d.logged=false;S.hist=[];go('D1');toast('Sesión cerrada.');},
  logoutAllDoc:()=>modal({t:'¿Cerrar sesión en todos los dispositivos?',b:'Úselo si perdió su celular o computador. Tendrá que volver a ingresar con correo y contraseña.',ok:['Cerrar sesiones','logoutAllDo'],okRed:true,no:'Cancelar'}),
@@ -790,11 +835,21 @@ const ACT={
  delFer:i=>{S.a.fer.splice(+i,1);render();toast('Fecha quitada.');},
  accAsk:k=>modal({t:k==='quitar'?'Quitar acceso a Ana P.':'Dar acceso a Ana P.',b:'Por seguridad, escriba el código de 6 dígitos que enviamos al correo de la doctora.',fields:[['code','Código de verificación','']],ok:['Confirmar','accDo',k],okRed:k==='quitar',no:'Cancelar'}),
  accDo:k=>{const c=document.getElementById('code').value.trim();if(!/^\d{6}$/.test(c)){toast('El código debe tener 6 dígitos. Pruebe con 123456.');return;}S.a.asis=k!=='quitar';S.modal=null;render();toast(k==='quitar'?'Acceso quitado. Ana P. ya no puede entrar.':'Acceso restablecido para Ana P.');},
+ bigTxt:()=>{S.p.big=!S.p.big;render();toast(S.p.big?'Letra grande activada.':'Letra normal.');},
+ filt:v=>{const [k,o]=v.split('|');S.p.filt[k]=o;render();},
+ msgOk:()=>{S.p.msgOk=!S.p.msgOk;render();},
+ offline:()=>{S.d.off=true;S.d.view='lista';S.d.day=1;S.hist=[];go('D2');toast('Modo sin internet (simulado).');},
+ online:()=>{S.d.off=false;render();toast('Conectado. Datos actualizados.');},
+ unlock:()=>{S.d.logged=true;S.hist=[];go('D2');toast('Desbloqueado con Face ID.');},
+ syncNow:()=>{S.a.sync='ok';S.modal=null;const av=S.d.avisos.find(x=>x.go==='sync');if(av)av.read=true;render();toast('Sincronizado con Outlook: 18 citas al día.');},
+ autoTog:k=>{const v=S.a.auto[k];v[2]=!v[2];render();toast(v[0]+(v[2]?' activado.':' apagado.'));},
+ autoEd:k=>{const v=S.a.auto[k];modal({t:v[0],fields:[['autov',v[1],v[3]]],ok:['Guardar','autoDo',k],no:'Cancelar'});},
+ autoDo:k=>{const x=document.getElementById('autov').value.trim();if(!x){toast('Escriba un valor.');return;}S.a.auto[k][3]=x;S.modal=null;render();toast('Guardado.');},
  logoutAsk:()=>modal({t:'¿Cerrar sesión en todos los dispositivos?',b:'Úselo si se perdió un celular o computador. Todos tendrán que volver a ingresar.',ok:['Cerrar sesiones','logoutDo'],okRed:true,no:'Cancelar'}),
  logoutDo:()=>{S.modal=null;render();toast('Sesiones cerradas en 3 dispositivos.');},
  logAsk:()=>modal({t:'Registro de actividad',b:'<div style="display:flex;flex-direction:column;gap:8px;font-size:14px"><div class="kv"><span>10 nov 13:05</span><b>Ana P. registró un pago</b></div><div class="kv"><span>10 nov 11:20</span><b>Sistema envió bienvenida</b></div><div class="kv"><span>9 nov 18:40</span><b>Doctora editó una ficha</b></div><div class="kv"><span>8 nov 02:00</span><b>Respaldo semanal</b></div></div>',raw:true,no:'Cerrar'})
 };
-const IN={dq:v=>{S.d.q=v;render();refocus('dq');},aq:v=>{S.a.q=v;render();refocus('aq');},rep:v=>{S.a.rep=v;render();},med:v=>{S.a.med=v;render();}};
+const IN={cfg:(v,el)=>{S.a[el.dataset.k]=v;render();toast('Configuración guardada.');},dq:v=>{S.d.q=v;render();refocus('dq');},aq:v=>{S.a.q=v;render();refocus('aq');},rep:v=>{S.a.rep=v;render();},med:v=>{S.a.med=v;render();}};
 function refocus(id){const el=document.getElementById(id);if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}}
 
 function modalHTML(){const m=S.modal;if(!m)return '';
@@ -809,6 +864,7 @@ function render(top){
  const scr=SCREENS[S.screen]||SCREENS[LISTS[S.role][0][0]];
  const st=dev.querySelector('.amain,.wmain');const y=st?st.scrollTop:0;
  dev.innerHTML=(S.role==='asi'?'':'')+scr()+modalHTML();
+ dev.classList.toggle('bigtxt',S.role==='pac'&&S.p.big);
  const nt=dev.querySelector('.amain,.wmain');if(nt&&!top)nt.scrollTop=y;
  const list=LISTS[S.role],cur=S.screen==='P3ok'?'P3':S.screen;
  document.getElementById('slist').innerHTML=list.map(([k,n])=>`<button class="${k===cur?'on':''}" data-jump="${k}"><span class="c">${k}</span>${n}</button>`).join('');
@@ -830,7 +886,7 @@ dev.addEventListener('click',e=>{
 const keep=e=>{const t=e.target;if(t.id&&!t.dataset.in&&!('nokeep' in t.dataset)&&!t.closest('#modal'))S.f[t.id]=t.type==='checkbox'?t.checked:t.value;};
 dev.addEventListener('input',keep);dev.addEventListener('change',keep);
 dev.addEventListener('input',e=>{const k=e.target.dataset.in;if(k&&IN[k]&&e.target.tagName==='INPUT')IN[k](e.target.value);});
-dev.addEventListener('change',e=>{const k=e.target.dataset.in;if(k&&IN[k]&&e.target.tagName==='SELECT')IN[k](e.target.value);});
+dev.addEventListener('change',e=>{const k=e.target.dataset.in;if(k&&IN[k]&&e.target.tagName==='SELECT')IN[k](e.target.value,e.target);});
 document.getElementById('slist').addEventListener('click',e=>{const b=e.target.closest('[data-jump]');if(!b)return;const k=b.dataset.jump;
  if(['P2','P4','P7','P8'].includes(k))ensureBooked();if(k==='P1'&&S.p.mode!=='nueva')S.p.mode='nueva';if(k==='P3'&&S.p.hst==='Completa'){S.screen='P3ok';S.modal=null;render(true);return;}
  S.hist=[];S.screen=k;S.modal=null;S.a.drawer=null;render(true);});

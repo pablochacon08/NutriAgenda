@@ -21,7 +21,7 @@ El prototipo es navegable y usa solo datos ficticios. Cada usuario tiene su prop
 - [Doctora (aplicación del iPhone)](04-prototipo/doctora.html)
 - [Asistente (panel web)](04-prototipo/asistente.html)
 
-Para verlo, abra la página del proyecto en GitHub Pages o descargue los archivos y ábralos con doble clic en cualquier navegador. Las capturas de las 27 pantallas están en `04-prototipo/capturas` y los flujos de ventanas, en `04-prototipo/flujos`.
+Para verlo, abra la página del proyecto en GitHub Pages o descargue los archivos y ábralos con doble clic en cualquier navegador. Las capturas de las 29 pantallas están en `04-prototipo/capturas` y los flujos de ventanas, en `04-prototipo/flujos`.
 
 ## Contenido del repositorio
 
